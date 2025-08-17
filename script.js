@@ -658,8 +658,8 @@ function showMacroDetails(parsed, macro, macroKey) {
                 <div><strong>최대품질:</strong> ${parsed.maxQuality}</div>
                 <div><strong>초기품질:</strong> ${parsed.initialQuality}</div>
                 <div><strong>내구도:</strong> ${parsed.durability}</div>
-                ${macro.food ? `<div><strong>음식:</strong> ${macro.food}</div>` : ''}
-                ${macro.masterPotion ? `<div><strong>명인의 약액:</strong> ✓</div>` : ''}
+                <div><strong>음식:</strong> ${macro.food || '없음'}</div>
+                <div><strong>명인의 약액:</strong> ${macro.masterPotion ? '✓ 사용' : '미사용'}</div>
             </div>
         </div>
         
