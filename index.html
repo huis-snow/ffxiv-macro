@@ -3,310 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우주공방 매크로 관리</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>JSON 검증 도구</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        textarea { width: 100%; height: 300px; margin: 10px 0; }
+        .error { color: red; background: #ffe6e6; padding: 10px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <!-- 상단 네비게이션 -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <i class="bi bi-gear-fill me-2"></i>우주공방 매크로 관리
-                </a>
-                <div class="navbar-nav ms-auto">
-                    <button class="btn btn-outline-light btn-sm me-2" onclick="exportData()">
-                        <i class="bi bi-download"></i> 데이터 내보내기
-                    </button>
-                    <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('fileInput').click()">
-                        <i class="bi bi-upload"></i> 데이터 가져오기
-                    </button>
-                    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importData(event)">
-                </div>
-            </div>
-        </nav>
-
-        <!-- 메인 컨텐츠 -->
-        <div class="row">
-            <!-- 좌측 패널 -->
-            <div class="col-lg-8">
-                <!-- 탭 네비게이션 -->
-                <ul class="nav nav-tabs" id="mainTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">
-                            <i class="bi bi-search"></i> 매크로 조회
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="mission-tab" data-bs-toggle="tab" data-bs-target="#mission" type="button" role="tab">
-                            <i class="bi bi-list-task"></i> 임무 조회
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab">
-                            <i class="bi bi-plus-circle"></i> 매크로 생성
-                        </button>
-                    </li>
-                </ul>
-
-                <!-- 탭 컨텐츠 -->
-                <div class="tab-content" id="mainTabContent">
-                    <!-- 매크로 조회 탭 -->
-                    <div class="tab-pane fade show active" id="search" role="tabpanel">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">검색 및 정렬</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label">작업량</label>
-                                        <input type="number" class="form-control" id="searchProgress" placeholder="작업량">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">최대품질</label>
-                                        <input type="number" class="form-control" id="searchMaxQuality" placeholder="최대품질">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">정렬</label>
-                                        <select class="form-select" id="sortBy">
-                                            <option value="progress">작업량</option>
-                                            <option value="max_quality">최대품질</option>
-                                            <option value="initial_quality">초기품질</option>
-                                            <option value="durability">내구도</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 d-flex align-items-end">
-                                        <button class="btn btn-primary me-2" onclick="searchMacros()">
-                                            <i class="bi bi-search"></i> 검색
-                                        </button>
-                                        <button class="btn btn-outline-secondary" onclick="refreshMacroTable()">
-                                            <i class="bi bi-arrow-clockwise"></i> 전체
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 매크로 테이블 -->
-                        <div class="card mt-3">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">매크로 목록</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-sm">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>작업량</th>
-                                                <th>최대품질</th>
-                                                <th>초기품질</th>
-                                                <th>내구도</th>
-                                                <th>음식</th>
-                                                <th>메모</th>
-                                                <th>연결 임무 수</th>
-                                                <th>작업</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="macroTableBody">
-                                            <!-- 동적으로 생성 -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 임무 조회 탭 -->
-                    <div class="tab-pane fade" id="mission" role="tabpanel">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">임무 검색</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">임무 이름</label>
-                                        <input type="text" class="form-control" id="searchMissionName" placeholder="임무 이름 검색" oninput="searchMissions()">
-                                    </div>
-                                    <div class="col-md-6 d-flex align-items-end">
-                                        <button class="btn btn-outline-secondary" onclick="refreshMissionTable()">
-                                            <i class="bi bi-arrow-clockwise"></i> 전체 보기
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 임무 테이블 -->
-                        <div class="card mt-3">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">임무 목록</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-sm">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>임무 이름</th>
-                                                <th>작업량</th>
-                                                <th>최대품질</th>
-                                                <th>초기품질</th>
-                                                <th>내구도</th>
-                                                <th>메모</th>
-                                                <th>작업</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="missionTableBody">
-                                            <!-- 동적으로 생성 -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 매크로 생성 탭 -->
-                    <div class="tab-pane fade" id="create" role="tabpanel">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">매크로 정보 입력</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label">작업량</label>
-                                        <input type="number" class="form-control" id="inputProgress" min="0">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">최대품질</label>
-                                        <input type="number" class="form-control" id="inputMaxQuality" min="0">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">초기품질</label>
-                                        <input type="number" class="form-control" id="inputInitialQuality" value="0" min="0">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">내구도</label>
-                                        <input type="number" class="form-control" id="inputDurability" min="1">
-                                    </div>
-                                </div>
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">음식</label>
-                                        <select class="form-select" id="inputFood">
-                                            <option value="">없음</option>
-                                            <option value="로네크 HQ">로네크 HQ</option>
-                                            <option value="세비체 HQ">세비체 HQ</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <label class="form-label">메모</label>
-                                        <input type="text" class="form-control" id="inputMemo" placeholder="메모">
-                                    </div>
-                                </div>
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-outline-primary" onclick="loadMacro()">
-                                        <i class="bi bi-search"></i> 조회/열기
-                                    </button>
-                                    <button class="btn btn-success" onclick="saveMacro()">
-                                        <i class="bi bi-save"></i> 저장
-                                    </button>
-                                    <button class="btn btn-danger" onclick="deleteMacro()">
-                                        <i class="bi bi-trash"></i> 삭제
-                                    </button>
-                                    <button class="btn btn-secondary" onclick="clearForm()">
-                                        <i class="bi bi-plus"></i> 새로 만들기
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 매크로 내용 -->
-                        <div class="card mt-3">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">매크로 내용</h5>
-                            </div>
-                            <div class="card-body">
-                                <textarea class="form-control" id="macroText" rows="20" placeholder="매크로 내용을 입력하세요..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 우측 패널 -->
-            <div class="col-lg-4">
-                <div class="card" id="rightPanel">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">매크로 정보</h5>
-                    </div>
-                    <div class="card-body" id="macroInfo">
-                        <div class="text-muted text-center p-4">
-                            매크로를 선택하세요
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- JSON 데이터 입력 모달 -->
-        <div class="modal fade" id="jsonInputModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">JSON 데이터 입력</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">JSON 데이터를 붙여넣기하세요:</label>
-                            <textarea class="form-control" id="jsonInput" rows="15" placeholder='{"macros": {...}, "missions": {...}}'></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button type="button" class="btn btn-primary" onclick="loadJsonData()">로드</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 임무 연결 모달 -->
-        <div class="modal fade" id="linkMissionModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">임무 연결</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">임무 이름:</label>
-                            <input type="text" class="form-control" id="missionNameInput" placeholder="임무 이름을 입력하세요">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button type="button" class="btn btn-primary" onclick="confirmLinkMission()">연결</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="container">
+        <h1>JSON 파일 검증 도구</h1>
+        
+        <h3>1. 파일 업로드로 검증</h3>
+        <input type="file" id="fileInput" accept=".json">
+        <button onclick="validateFile()">파일 검증</button>
+        
+        <h3>2. 직접 붙여넣기로 검증</h3>
+        <textarea id="jsonInput" placeholder="JSON 내용을 여기에 붙여넣으세요..."></textarea>
+        <button onclick="validateText()">텍스트 검증</button>
+        
+        <h3>3. 수정된 JSON (오류 발견 시 자동 수정)</h3>
+        <textarea id="fixedJson" placeholder="수정된 JSON이 여기에 표시됩니다..."></textarea>
+        <button onclick="downloadFixed()">수정된 파일 다운로드</button>
+        
+        <div id="result"></div>
     </div>
 
-    <!-- 플로팅 버튼 - JSON 직접 입력 -->
-    <div class="position-fixed bottom-0 end-0 p-3">
-        <button class="btn btn-info btn-lg rounded-circle" data-bs-toggle="modal" data-bs-target="#jsonInputModal" title="JSON 직접 입력">
-            <i class="bi bi-code-square"></i>
-        </button>
-    </div>
+    <script>
+        function showResult(message, isError = false) {
+            const result = document.getElementById('result');
+            result.innerHTML = `<div class="${isError ? 'error' : 'success'}">${message}</div>`;
+        }
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- 메인 스크립트 -->
-    <script src="script.js"></script>
+        function validateFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('파일을 선택하세요.', true);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                validateJson(content);
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function validateText() {
+            const content = document.getElementById('jsonInput').value;
+            if (!content.trim()) {
+                showResult('JSON 내용을 입력하세요.', true);
+                return;
+            }
+            validateJson(content);
+        }
+
+        function validateJson(content) {
+            try {
+                // 기본 JSON 파싱 시도
+                const data = JSON.parse(content);
+                
+                // 구조 검증
+                if (typeof data !== 'object' || data === null) {
+                    throw new Error('JSON은 객체여야 합니다.');
+                }
+                
+                // macros와 missions 구조 확인
+                if (!data.hasOwnProperty('macros')) {
+                    data.macros = {};
+                    showResult('⚠️ macros 속성이 없어서 추가했습니다.', false);
+                }
+                
+                if (!data.hasOwnProperty('missions')) {
+                    data.missions = {};
+                    showResult('⚠️ missions 속성이 없어서 추가했습니다.', false);
+                }
+                
+                // 매크로 데이터 검증
+                let fixedCount = 0;
+                for (const [key, macro] of Object.entries(data.macros)) {
+                    if (typeof macro === 'string') {
+                        // 레거시 형식 - 문제없음
+                        continue;
+                    } else if (typeof macro === 'object' && macro !== null) {
+                        // 새 형식 - text 속성 확인
+                        if (!macro.hasOwnProperty('text')) {
+                            macro.text = macro.content || macro.macro || '';
+                            fixedCount++;
+                        }
+                        if (!macro.hasOwnProperty('food')) {
+                            macro.food = '';
+                        }
+                        if (!macro.hasOwnProperty('memo')) {
+                            macro.memo = '';
+                        }
+                    } else {
+                        // 잘못된 형식
+                        data.macros[key] = {
+                            text: String(macro),
+                            food: '',
+                            memo: ''
+                        };
+                        fixedCount++;
+                    }
+                }
+                
+                // 수정된 JSON 표시
+                const fixedJson = JSON.stringify(data, null, 2);
+                document.getElementById('fixedJson').value = fixedJson;
+                
+                let message = '✅ JSON이 유효합니다!';
+                if (fixedCount > 0) {
+                    message += ` (${fixedCount}개 항목이 자동 수정됨)`;
+                }
+                message += `<br>매크로 개수: ${Object.keys(data.macros).length}`;
+                message += `<br>임무 개수: ${Object.keys(data.missions).length}`;
+                
+                showResult(message, false);
+                
+            } catch (error) {
+                let errorMessage = `❌ JSON 오류: ${error.message}`;
+                
+                // 일반적인 JSON 오류 해결 방법 제시
+                if (error.message.includes('Unexpected token')) {
+                    errorMessage += '<br><br>💡 해결 방법:';
+                    errorMessage += '<br>1. 따옴표가 제대로 닫혔는지 확인';
+                    errorMessage += '<br>2. 마지막 항목 뒤에 쉼표(,)가 있는지 확인';
+                    errorMessage += '<br>3. 중괄호 {}와 대괄호 []가 제대로 닫혔는지 확인';
+                }
+                
+                if (error.message.includes('Unexpected end')) {
+                    errorMessage += '<br><br>💡 파일이 잘리거나 불완전합니다.';
+                }
+                
+                showResult(errorMessage, true);
+            }
+        }
+
+        function downloadFixed() {
+            const content = document.getElementById('fixedJson').value;
+            if (!content.trim()) {
+                showResult('수정된 JSON이 없습니다.', true);
+                return;
+            }
+            
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'space_craft_macros_fixed.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showResult('✅ 수정된 파일이 다운로드되었습니다!', false);
+        }
+    </script>
 </body>
 </html>
