@@ -789,11 +789,57 @@ function showMacroInfo(message) {
     `;
 }
 
+// 특정 매크로 행 업데이트
+function updateTableRow(macroKey) {
+    const tbody = document.getElementById('macroTableBody');
+    if (!tbody) return;
+    
+    // 해당 매크로 키를 가진 행 찾기
+    const rows = tbody.querySelectorAll('tr');
+    for (const row of rows) {
+        if (row.dataset.macroKey === macroKey) {
+            // 매크로 데이터 가져오기
+            const macro = getMacro(macroKey);
+            if (!macro) return;
+            
+            const parsed = parseMacroKey(macroKey);
+            
+            // 매크로 객체 생성 (getAllMacros와 동일한 형태)
+            const macroObj = {
+                progress: parsed.progress,
+                maxQuality: parsed.maxQuality,
+                initialQuality: parsed.initialQuality,
+                durability: parsed.durability,
+                food: macro.food || '',
+                masterPotion: macro.masterPotion || false,
+                memo: macro.memo || '',
+                key: macroKey
+            };
+            
+            // 새로운 행 생성하여 교체
+            const newRow = createMacroTableRow(macroObj);
+            row.parentNode.replaceChild(newRow, row);
+            
+            // 하이라이트가 있었다면 유지
+            if (row.classList.contains('table-active')) {
+                newRow.classList.add('table-active');
+            }
+            
+            break;
+        }
+    }
+}
+
 // 매크로 메모 업데이트
 function updateMacroMemo(macroKey, memo) {
     const macro = getMacro(macroKey);
     if (macro) {
-        setMacro(macroKey, macro.text, macro.food, memo);
+        setMacro(macroKey, macro.text, macro.food, memo, macro.masterPotion);
+        
+        // 테이블의 해당 행 업데이트
+        updateTableRow(macroKey);
+        
+        showAlert('메모가 업데이트되었습니다.', 'success');
     }
 }
 
