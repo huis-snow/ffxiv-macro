@@ -1,10 +1,10 @@
 // 전역 변수
-let macroData = {
+var macroData = {
     macros: {},
     missions: {}
 };
 
-let currentMacroKey = null;
+var currentMacroKey = null;
 
 // localStorage 키
 const STORAGE_KEY = 'ffxiv_macro_data';
@@ -214,9 +214,9 @@ function parseMacroKey(key) {
 // 매크로 조회
 function getMacro(key) {
     // 직접 키로 조회
-    let macroData = macroData.macros[key];
+    let foundMacro = macroData.macros[key];
     
-    if (!macroData) {
+    if (!foundMacro) {
         // 다양한 키 형태로 시도
         try {
             const parsed = parseMacroKey(key);
@@ -235,7 +235,7 @@ function getMacro(key) {
             
             for (const possibleKey of possibleKeys) {
                 if (macroData.macros[possibleKey]) {
-                    macroData = macroData.macros[possibleKey];
+                    foundMacro = macroData.macros[possibleKey];
                     break;
                 }
             }
@@ -244,23 +244,23 @@ function getMacro(key) {
         }
     }
     
-    if (!macroData) {
+    if (!foundMacro) {
         return null;
     }
     
     // 레거시 형식 지원
-    if (typeof macroData === 'string') {
+    if (typeof foundMacro === 'string') {
         return {
-            text: macroData,
+            text: foundMacro,
             food: '',
             memo: ''
         };
     }
     
     return {
-        text: macroData.text || '',
-        food: macroData.food || '',
-        memo: macroData.memo || ''
+        text: foundMacro.text || '',
+        food: foundMacro.food || '',
+        memo: foundMacro.memo || ''
     };
 }
 
@@ -692,11 +692,16 @@ function loadMacro() {
 // 매크로 저장
 function saveMacro() {
     try {
+        console.log('saveMacro 시작, macroData:', macroData);
+        
         const { progress, maxQuality, initialQuality, durability } = validateInputs();
         const macroKey = createMacroKey(progress, maxQuality, initialQuality, durability);
         const text = document.getElementById('macroText').value.trim();
         const food = document.getElementById('inputFood').value;
         const memo = document.getElementById('inputMemo').value.trim();
+        
+        console.log('매크로 키:', macroKey);
+        console.log('매크로 텍스트:', text);
         
         if (!text) {
             if (confirm('매크로 내용이 비어있습니다. 삭제하시겠습니까?')) {
@@ -710,12 +715,16 @@ function saveMacro() {
             return;
         }
         
+        console.log('setMacro 호출 전');
         setMacro(macroKey, text, food, memo);
+        console.log('setMacro 호출 후');
+        
         viewMacro(macroKey);
         refreshMacroTable();
         refreshMissionTable();
         showAlert('매크로가 저장되었습니다.', 'success');
     } catch (e) {
+        console.error('saveMacro 오류:', e);
         showAlert(e.message, 'warning');
     }
 }
