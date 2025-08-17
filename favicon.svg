@@ -1,68 +1,86 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <!-- 배경 원 -->
-  <circle cx="16" cy="16" r="15" fill="#fff3e0" stroke="#ff8c00" stroke-width="2"/>
+  <circle cx="16" cy="16" r="15" fill="#f0f8ff" stroke="#87ceeb" stroke-width="2"/>
   
-  <!-- 당근 몸통 -->
+  <!-- 토끼 귀 -->
+  <g fill="#ffffff" stroke="#ddd" stroke-width="1">
+    <!-- 왼쪽 귀 -->
+    <ellipse cx="11" cy="8" rx="3" ry="7" fill="#ffffff"/>
+    <ellipse cx="11" cy="8" rx="1.5" ry="5" fill="#ffe4e1"/>
+    
+    <!-- 오른쪽 귀 -->
+    <ellipse cx="21" cy="8" rx="3" ry="7" fill="#ffffff"/>
+    <ellipse cx="21" cy="8" rx="1.5" ry="5" fill="#ffe4e1"/>
+  </g>
+  
+  <!-- 토끼 얼굴 -->
+  <ellipse cx="16" cy="18" rx="9" ry="8" fill="#ffffff" stroke="#ddd" stroke-width="1"/>
+  
+  <!-- 토끼 특유의 눈 (크고 파란색) -->
   <g>
-    <!-- 당근 메인 몸체 -->
-    <path d="M 16 10 Q 20 12 20 18 Q 20 24 16 26 Q 12 24 12 18 Q 12 12 16 10 Z" 
-          fill="#ff6600" stroke="#e55100" stroke-width="1"/>
+    <!-- 눈 바탕 -->
+    <ellipse cx="13" cy="16" rx="2" ry="2.5" fill="#4169e1"/>
+    <ellipse cx="19" cy="16" rx="2" ry="2.5" fill="#4169e1"/>
     
-    <!-- 당근 하이라이트 -->
-    <path d="M 14 12 Q 17 13 17 16 Q 17 20 15 22" 
-          stroke="#ff9933" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- 눈동자 -->
+    <ellipse cx="13" cy="16.5" rx="1.2" ry="1.8" fill="#191970"/>
+    <ellipse cx="19" cy="16.5" rx="1.2" ry="1.8" fill="#191970"/>
+    
+    <!-- 하이라이트 -->
+    <ellipse cx="13.5" cy="15.5" rx="0.6" ry="0.8" fill="#ffffff"/>
+    <ellipse cx="19.5" cy="15.5" rx="0.6" ry="0.8" fill="#ffffff"/>
+    
+    <!-- 작은 반짝이 -->
+    <circle cx="12.5" cy="16.8" r="0.2" fill="#ffffff"/>
+    <circle cx="18.5" cy="16.8" r="0.2" fill="#ffffff"/>
   </g>
   
-  <!-- 당근 잎사귀 -->
-  <g fill="#4caf50" stroke="#388e3c" stroke-width="1">
-    <!-- 중앙 잎 -->
-    <path d="M 16 10 Q 16 6 15 4 Q 16 3 17 4 Q 16 6 16 10" fill="#4caf50"/>
-    
-    <!-- 왼쪽 잎 -->
-    <path d="M 15 9 Q 13 7 11 5 Q 12 4 13 5 Q 15 7 15 9" fill="#66bb6a"/>
-    
-    <!-- 오른쪽 잎 -->
-    <path d="M 17 9 Q 19 7 21 5 Q 20 4 19 5 Q 17 7 17 9" fill="#66bb6a"/>
-    
-    <!-- 추가 작은 잎들 -->
-    <path d="M 14 8 Q 12 6 10 6 Q 11 5 12 6 Q 14 7 14 8" fill="#81c784"/>
-    <path d="M 18 8 Q 20 6 22 6 Q 21 5 20 6 Q 18 7 18 8" fill="#81c784"/>
+  <!-- 눈썹 -->
+  <g stroke="#333" stroke-width="1" fill="none" stroke-linecap="round">
+    <path d="M 11 13.5 Q 13 12.5 15 13"/>
+    <path d="M 17 13 Q 19 12.5 21 13.5"/>
   </g>
   
-  <!-- 당근 얼굴 -->
-  <!-- 눈 -->
-  <g fill="#333333">
-    <circle cx="14" cy="16" r="1"/>
-    <circle cx="18" cy="16" r="1"/>
-  </g>
+  <!-- 코 (작고 핑크) -->
+  <ellipse cx="16" cy="19" rx="0.8" ry="0.6" fill="#ffb6c1"/>
   
-  <!-- 눈 하이라이트 -->
-  <g fill="#ffffff">
-    <circle cx="14.3" cy="15.7" r="0.3"/>
-    <circle cx="18.3" cy="15.7" r="0.3"/>
+  <!-- 입 (토끼 특유의 Y자 모양) -->
+  <g stroke="#333" stroke-width="1.2" fill="none" stroke-linecap="round">
+    <line x1="16" y1="19.8" x2="16" y2="21"/>
+    <path d="M 16 21 Q 14.5 22 13 21"/>
+    <path d="M 16 21 Q 17.5 22 19 21"/>
   </g>
-  
-  <!-- 입 (귀여운 미소) -->
-  <path d="M 14 19 Q 16 20.5 18 19" 
-        stroke="#d84315" stroke-width="1.5" fill="none" stroke-linecap="round"/>
   
   <!-- 볼 홍조 -->
-  <g fill="#ff9800" opacity="0.4">
-    <circle cx="12.5" cy="18" r="1"/>
-    <circle cx="19.5" cy="18" r="1"/>
+  <g fill="#ffb6c1" opacity="0.5">
+    <circle cx="9" cy="19" r="1.5"/>
+    <circle cx="23" cy="19" r="1.5"/>
   </g>
   
-  <!-- 당근 줄무늬 -->
-  <g stroke="#e55100" stroke-width="0.8" opacity="0.6">
-    <path d="M 13 14 Q 16 14.5 19 14" stroke-linecap="round"/>
-    <path d="M 13 20 Q 16 20.5 19 20" stroke-linecap="round"/>
-    <path d="M 14 22 Q 16 22.3 18 22" stroke-linecap="round"/>
+  <!-- 수염 -->
+  <g stroke="#666" stroke-width="1" stroke-linecap="round">
+    <!-- 왼쪽 수염 -->
+    <line x1="7" y1="18" x2="4" y2="17"/>
+    <line x1="7" y1="20" x2="4" y2="20"/>
+    <line x1="7" y1="22" x2="4" y2="23"/>
+    
+    <!-- 오른쪽 수염 -->
+    <line x1="25" y1="18" x2="28" y2="17"/>
+    <line x1="25" y1="20" x2="28" y2="20"/>
+    <line x1="25" y1="22" x2="28" y2="23"/>
   </g>
   
-  <!-- 작은 반짝이 -->
-  <g fill="#ffeb3b" opacity="0.8">
-    <circle cx="6" cy="8" r="0.5"/>
-    <circle cx="26" cy="12" r="0.6"/>
+  <!-- 머리 장식 (작은 파란 보석) -->
+  <g>
+    <ellipse cx="16" cy="10" rx="1.5" ry="1" fill="#4169e1" stroke="#191970" stroke-width="0.5"/>
+    <ellipse cx="16" cy="9.7" rx="0.8" ry="0.5" fill="#87ceeb"/>
+  </g>
+  
+  <!-- 배경 장식 (작은 별들) -->
+  <g fill="#87ceeb" opacity="0.6">
+    <circle cx="6" cy="8" r="0.4"/>
+    <circle cx="26" cy="10" r="0.5"/>
+    <circle cx="8" cy="25" r="0.3"/>
     <circle cx="24" cy="26" r="0.4"/>
   </g>
 </svg>
