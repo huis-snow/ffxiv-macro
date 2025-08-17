@@ -9,6 +9,7 @@ var currentMacroKey = null;
 // localStorage 키
 const STORAGE_KEY = 'ffxiv_macro_data';
 const THEME_STORAGE_KEY = 'ffxiv_theme_preference';
+const COLUMN_ORDER_KEY = 'ffxiv_column_order';
 
 // 정렬 상태
 let currentSort = {
@@ -16,16 +17,28 @@ let currentSort = {
     direction: 'asc' // asc, desc
 };
 
+// 기본 컬럼 순서
+const DEFAULT_COLUMN_ORDER = ['select', 'progress', 'maxQuality', 'initialQuality', 'durability', 'food', 'masterPotion', 'memo', 'copyButtons', 'actions'];
+
+// 현재 컬럼 순서
+let currentColumnOrder = [...DEFAULT_COLUMN_ORDER];
+
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
     // 테마 설정 로드
     loadThemePreference();
+    
+    // 컬럼 순서 설정 로드
+    loadColumnOrder();
     
     // 캐시된 데이터 로드
     loadCachedData();
     
     // 이벤트 리스너 등록
     registerEventListeners();
+    
+    // 헤더 드래그 이벤트 등록
+    setupHeaderDragAndDrop();
     
     // DOM이 완전히 준비된 후 테이블 렌더링
     setTimeout(() => {
@@ -380,26 +393,48 @@ function loadAllMacros() {
 // 매크로 테이블 행 생성
 function createMacroTableRow(macro) {
     const row = document.createElement('tr');
-    row.innerHTML = `
-        <td>
-            <button class="btn btn-sm btn-primary" onclick="selectMacro('${macro.key}', this)">선택</button>
-        </td>
-        <td>${macro.progress}</td>
-        <td>${macro.maxQuality}</td>
-        <td>${macro.initialQuality}</td>
-        <td>${macro.durability}</td>
-        <td>${macro.food || '-'}</td>
-        <td>${macro.masterPotion ? '✓' : '-'}</td>
-        <td>${macro.memo || '-'}</td>
-        <td>
+    
+    // 매크로 텍스트를 가져와서 블록 개수 확인
+    const macroData = getMacro(macro.key);
+    const macroText = macroData ? macroData.text : '';
+    const lines = macroText ? macroText.split('\n') : [];
+    const blockSize = 15;
+    const totalBlocks = Math.ceil(lines.length / blockSize);
+    
+    // 복사 버튼들 생성 (최대 3개)
+    let copyButtons = '';
+    for (let i = 1; i <= Math.min(totalBlocks, 3); i++) {
+        copyButtons += `<button class="btn btn-sm btn-outline-info me-1" onclick="copyMacroBlock('${macro.key}', ${i})" title="블록 ${i} 복사">복사${i}</button>`;
+    }
+    
+    // 컬럼별 데이터 매핑
+    const columnData = {
+        select: `<button class="btn btn-sm btn-primary" onclick="selectMacro('${macro.key}', this)">선택</button>`,
+        progress: macro.progress,
+        maxQuality: macro.maxQuality,
+        initialQuality: macro.initialQuality,
+        durability: macro.durability,
+        food: macro.food || '-',
+        masterPotion: macro.masterPotion ? '✓' : '-',
+        memo: macro.memo || '-',
+        copyButtons: copyButtons,
+        actions: `
             <button class="btn btn-sm btn-outline-success me-1" onclick="editMacro('${macro.key}')" title="수정">
                 <i class="bi bi-pencil"></i>
             </button>
             <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteMacro('${macro.key}')" title="삭제">
                 <i class="bi bi-trash"></i>
             </button>
-        </td>
-    `;
+        `
+    };
+    
+    // 현재 컬럼 순서에 맞게 셀 생성
+    let rowHTML = '';
+    currentColumnOrder.forEach(columnName => {
+        rowHTML += `<td>${columnData[columnName] || ''}</td>`;
+    });
+    
+    row.innerHTML = rowHTML;
     
     // 행 클릭으로 선택
     row.addEventListener('click', (e) => {
@@ -539,7 +574,7 @@ function renderSortedTable() {
     if (macros.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" class="text-center text-muted p-4">
+                <td colspan="10" class="text-center text-muted p-4">
                     <i class="bi bi-inbox display-6 d-block mb-2"></i>
                     <div>저장된 매크로가 없습니다.</div>
                     <small>상단의 "데이터 가져오기" 버튼을 사용하거나 "매크로 생성" 탭에서 새로 만드세요.</small>
@@ -737,6 +772,34 @@ function toggleBlock(blockNum) {
     } else {
         content.style.display = 'none';
         btn.textContent = '펼치기';
+    }
+}
+
+// 테이블에서 매크로 블록 복사
+function copyMacroBlock(macroKey, blockNum) {
+    try {
+        const macro = getMacro(macroKey);
+        if (!macro || !macro.text) {
+            showAlert('매크로 데이터를 찾을 수 없습니다.', 'danger');
+            return;
+        }
+        
+        const lines = macro.text.split('\n');
+        const blockSize = 15;
+        const startIndex = (blockNum - 1) * blockSize;
+        const endIndex = Math.min(startIndex + blockSize, lines.length);
+        const blockLines = lines.slice(startIndex, endIndex);
+        const blockText = blockLines.join('\n');
+        
+        navigator.clipboard.writeText(blockText).then(() => {
+            showAlert(`블록 ${blockNum}이 클립보드에 복사되었습니다.`, 'success');
+        }).catch(err => {
+            console.error('클립보드 복사 오류:', err);
+            showAlert('복사에 실패했습니다.', 'danger');
+        });
+    } catch (error) {
+        console.error('매크로 블록 복사 오류:', error);
+        showAlert('복사 중 오류가 발생했습니다.', 'danger');
     }
 }
 
@@ -1204,6 +1267,153 @@ function updateThemeToggleButton(isDarkMode) {
             icon.className = 'bi bi-moon-fill';
             toggleBtn.title = '다크 모드로 전환';
         }
+    }
+}
+
+// 컬럼 순서 관련 함수들
+function loadColumnOrder() {
+    try {
+        const savedOrder = localStorage.getItem(COLUMN_ORDER_KEY);
+        if (savedOrder) {
+            const parsedOrder = JSON.parse(savedOrder);
+            if (Array.isArray(parsedOrder) && parsedOrder.length === DEFAULT_COLUMN_ORDER.length) {
+                currentColumnOrder = parsedOrder;
+                applyColumnOrder();
+            }
+        }
+    } catch (error) {
+        console.error('컬럼 순서 로드 실패:', error);
+        currentColumnOrder = [...DEFAULT_COLUMN_ORDER];
+    }
+}
+
+function saveColumnOrder() {
+    try {
+        localStorage.setItem(COLUMN_ORDER_KEY, JSON.stringify(currentColumnOrder));
+        console.log('컬럼 순서가 저장되었습니다:', currentColumnOrder);
+    } catch (error) {
+        console.error('컬럼 순서 저장 실패:', error);
+    }
+}
+
+function applyColumnOrder() {
+    const headerRow = document.getElementById('tableHeader');
+    if (!headerRow) return;
+    
+    const headers = Array.from(headerRow.children);
+    const headerMap = {};
+    
+    // 현재 헤더들을 데이터 속성으로 매핑
+    headers.forEach(header => {
+        const column = header.getAttribute('data-column');
+        if (column) {
+            headerMap[column] = header;
+        }
+    });
+    
+    // 저장된 순서대로 헤더 재배치
+    headerRow.innerHTML = '';
+    currentColumnOrder.forEach(columnName => {
+        if (headerMap[columnName]) {
+            headerRow.appendChild(headerMap[columnName]);
+        }
+    });
+}
+
+// 헤더 드래그 앤 드롭 설정
+function setupHeaderDragAndDrop() {
+    const headerRow = document.getElementById('tableHeader');
+    if (!headerRow) return;
+    
+    let draggedElement = null;
+    
+    // 드래그 시작
+    headerRow.addEventListener('dragstart', function(e) {
+        if (e.target.tagName === 'TH' && e.target.draggable) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.outerHTML);
+        }
+    });
+    
+    // 드래그 오버
+    headerRow.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        const target = e.target.closest('th');
+        if (target && target !== draggedElement && target.draggable) {
+            // 모든 드롭 표시 제거
+            headerRow.querySelectorAll('th').forEach(th => th.classList.remove('drag-over'));
+            target.classList.add('drag-over');
+        }
+    });
+    
+    // 드래그 리브
+    headerRow.addEventListener('dragleave', function(e) {
+        const target = e.target.closest('th');
+        if (target) {
+            target.classList.remove('drag-over');
+        }
+    });
+    
+    // 드롭
+    headerRow.addEventListener('drop', function(e) {
+        e.preventDefault();
+        
+        const target = e.target.closest('th');
+        if (target && target !== draggedElement && target.draggable) {
+            const draggedColumn = draggedElement.getAttribute('data-column');
+            const targetColumn = target.getAttribute('data-column');
+            
+            // 컬럼 순서 배열에서 위치 변경
+            const draggedIndex = currentColumnOrder.indexOf(draggedColumn);
+            const targetIndex = currentColumnOrder.indexOf(targetColumn);
+            
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                // 배열에서 드래그된 요소 제거하고 새 위치에 삽입
+                currentColumnOrder.splice(draggedIndex, 1);
+                currentColumnOrder.splice(targetIndex, 0, draggedColumn);
+                
+                // DOM 순서 업데이트
+                applyColumnOrder();
+                
+                // 테이블 데이터 재렌더링
+                renderSortedTable();
+                
+                // 순서 저장
+                saveColumnOrder();
+                
+                showAlert('컬럼 순서가 변경되었습니다.', 'success');
+            }
+        }
+        
+        // 모든 드래그 관련 클래스 제거
+        headerRow.querySelectorAll('th').forEach(th => {
+            th.classList.remove('dragging', 'drag-over');
+        });
+    });
+    
+    // 드래그 종료
+    headerRow.addEventListener('dragend', function(e) {
+        if (e.target.tagName === 'TH') {
+            e.target.classList.remove('dragging');
+            headerRow.querySelectorAll('th').forEach(th => {
+                th.classList.remove('drag-over');
+            });
+        }
+    });
+}
+
+// 컬럼 순서 초기화
+function resetColumnOrder() {
+    if (confirm('컬럼 순서를 기본값으로 초기화하시겠습니까?')) {
+        currentColumnOrder = [...DEFAULT_COLUMN_ORDER];
+        applyColumnOrder();
+        renderSortedTable();
+        saveColumnOrder();
+        showAlert('컬럼 순서가 초기화되었습니다.', 'success');
     }
 }
 

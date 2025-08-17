@@ -617,3 +617,67 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+/* ============================================
+   드래그 가능한 헤더 스타일
+   ============================================ */
+
+/* 드래그 가능한 헤더 */
+th[draggable="true"] {
+    cursor: move;
+    user-select: none;
+    position: relative;
+}
+
+th[draggable="true"]:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* 드래그 중인 헤더 */
+th.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    z-index: 1000;
+}
+
+/* 드롭 대상 헤더 */
+th.drag-over {
+    background-color: rgba(0, 123, 255, 0.2) !important;
+    border-left: 3px solid #007bff;
+}
+
+/* 드래그 중 커서 */
+th[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+/* 헤더 드래그 표시 아이콘 */
+th[draggable="true"]::before {
+    content: "⋮⋮";
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+th[draggable="true"]:hover::before {
+    opacity: 1;
+}
+
+/* 다크모드에서 드래그 헤더 스타일 */
+body.dark-mode th[draggable="true"]:hover {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode th.drag-over {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+    border-left: 3px solid #3b82f6;
+}
+
+body.dark-mode th[draggable="true"]::before {
+    color: #9ca3af;
+}
+

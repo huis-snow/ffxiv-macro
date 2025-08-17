@@ -57,10 +57,13 @@
                     <button class="btn btn-outline-light btn-sm me-2" onclick="exportData()">
                         <i class="bi bi-download"></i> 데이터 내보내기
                     </button>
-                    <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('fileInput').click()">
+                    <button class="btn btn-outline-light btn-sm me-2" onclick="document.getElementById('fileInput').click()">
                         <i class="bi bi-upload"></i> 데이터 가져오기
                     </button>
                     <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importData(event)">
+                    <button class="btn btn-outline-light btn-sm" onclick="resetColumnOrder()" title="컬럼 순서 초기화">
+                        <i class="bi bi-arrow-clockwise"></i> 컬럼 초기화
+                    </button>
                 </div>
             </div>
         </nav>
@@ -121,24 +124,25 @@
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm">
                                         <thead class="table-light">
-                                            <tr>
-                                                <th>선택</th>
-                                                <th class="sortable" onclick="sortTable('progress')" style="cursor: pointer;">
+                                            <tr id="tableHeader">
+                                                <th draggable="true" data-column="select">선택</th>
+                                                <th draggable="true" data-column="progress" class="sortable" onclick="sortTable('progress')" style="cursor: pointer;">
                                                     작업량 <i id="sort-progress" class="bi bi-arrow-down-up"></i>
                                                 </th>
-                                                <th class="sortable" onclick="sortTable('maxQuality')" style="cursor: pointer;">
+                                                <th draggable="true" data-column="maxQuality" class="sortable" onclick="sortTable('maxQuality')" style="cursor: pointer;">
                                                     최대품질 <i id="sort-maxQuality" class="bi bi-arrow-down-up"></i>
                                                 </th>
-                                                <th class="sortable" onclick="sortTable('initialQuality')" style="cursor: pointer;">
+                                                <th draggable="true" data-column="initialQuality" class="sortable" onclick="sortTable('initialQuality')" style="cursor: pointer;">
                                                     초기품질 <i id="sort-initialQuality" class="bi bi-arrow-down-up"></i>
                                                 </th>
-                                                <th class="sortable" onclick="sortTable('durability')" style="cursor: pointer;">
+                                                <th draggable="true" data-column="durability" class="sortable" onclick="sortTable('durability')" style="cursor: pointer;">
                                                     내구도 <i id="sort-durability" class="bi bi-arrow-down-up"></i>
                                                 </th>
-                                                <th>음식</th>
-                                                <th>명인의 약액</th>
-                                                <th>메모</th>
-                                                <th>작업</th>
+                                                <th draggable="true" data-column="food">음식</th>
+                                                <th draggable="true" data-column="masterPotion">명인의 약액</th>
+                                                <th draggable="true" data-column="memo">메모</th>
+                                                <th draggable="true" data-column="copyButtons">블록 복사</th>
+                                                <th draggable="true" data-column="actions">작업</th>
                                             </tr>
                                         </thead>
                                         <tbody id="macroTableBody">
@@ -423,12 +427,7 @@
 
     </div>
 
-    <!-- 플로팅 버튼 - JSON 직접 입력 -->
-    <div class="position-fixed bottom-0 end-0 p-3">
-        <button class="btn btn-info btn-lg rounded-circle" data-bs-toggle="modal" data-bs-target="#jsonInputModal" title="JSON 직접 입력">
-            <i class="bi bi-code-square"></i>
-        </button>
-    </div>
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
