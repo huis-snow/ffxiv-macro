@@ -6,10 +6,13 @@ let macroData = {
 
 let currentMacroKey = null;
 
+// localStorage 키
+const STORAGE_KEY = 'ffxiv_macro_data';
+
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    // 샘플 데이터 로드 (초기화용)
-    loadSampleData();
+    // 캐시된 데이터 로드
+    loadCachedData();
     
     // 이벤트 리스너 등록
     registerEventListeners();
@@ -17,6 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 초기 테이블 로드
     refreshMacroTable();
     refreshMissionTable();
+    
+    // 페이지 언로드 시 자동 저장
+    window.addEventListener('beforeunload', function() {
+        saveToCacheQuiet();
+    });
 });
 
 // 이벤트 리스너 등록
@@ -50,12 +58,123 @@ function registerEventListeners() {
     });
 }
 
-// 샘플 데이터 로드
-function loadSampleData() {
-    macroData = {
-        macros: {},
-        missions: {}
-    };
+// 캐시된 데이터 로드
+function loadCachedData() {
+    try {
+        const cachedData = localStorage.getItem(STORAGE_KEY);
+        if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            macroData = {
+                macros: parsed.macros || {},
+                missions: parsed.missions || {}
+            };
+            console.log('캐시된 데이터를 로드했습니다.', {
+                macros: Object.keys(macroData.macros).length,
+                missions: Object.keys(macroData.missions).length
+            });
+            
+            // 데이터가 있으면 알림 표시
+            if (Object.keys(macroData.macros).length > 0) {
+                setTimeout(() => {
+                    showAlert(`캐시된 데이터를 불러왔습니다. (매크로 ${Object.keys(macroData.macros).length}개, 임무 ${Object.keys(macroData.missions).length}개)`, 'info');
+                }, 500);
+            }
+        } else {
+            // 캐시된 데이터가 없으면 빈 데이터로 초기화
+            macroData = {
+                macros: {},
+                missions: {}
+            };
+            console.log('캐시된 데이터가 없습니다. 빈 데이터로 초기화했습니다.');
+        }
+    } catch (error) {
+        console.error('캐시된 데이터 로드 실패:', error);
+        macroData = {
+            macros: {},
+            missions: {}
+        };
+        showAlert('캐시된 데이터를 불러오는데 실패했습니다. 빈 데이터로 시작합니다.', 'warning');
+    }
+}
+
+// 데이터 캐시에 저장
+function saveToCache() {
+    try {
+        const dataToSave = {
+            macros: macroData.macros,
+            missions: macroData.missions,
+            savedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        console.log('데이터가 캐시에 저장되었습니다.');
+        showAlert('데이터가 자동 저장되었습니다.', 'success');
+        
+        return true;
+    } catch (error) {
+        console.error('캐시 저장 실패:', error);
+        showAlert('자동 저장에 실패했습니다. 용량 부족일 수 있습니다.', 'warning');
+        return false;
+    }
+}
+
+// 조용히 캐시에 저장 (알림 없음)
+function saveToCacheQuiet() {
+    try {
+        const dataToSave = {
+            macros: macroData.macros,
+            missions: macroData.missions,
+            savedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        console.log('데이터가 자동으로 캐시에 저장되었습니다.');
+        return true;
+    } catch (error) {
+        console.error('자동 캐시 저장 실패:', error);
+        return false;
+    }
+}
+
+// 캐시 삭제
+function clearCache() {
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+        macroData = {
+            macros: {},
+            missions: {}
+        };
+        refreshMacroTable();
+        refreshMissionTable();
+        showMacroInfo('매크로를 선택하세요');
+        showAlert('캐시가 삭제되었습니다.', 'success');
+    } catch (error) {
+        console.error('캐시 삭제 실패:', error);
+        showAlert('캐시 삭제에 실패했습니다.', 'danger');
+    }
+}
+
+// 캐시 상태 확인
+function getCacheInfo() {
+    try {
+        const cachedData = localStorage.getItem(STORAGE_KEY);
+        if (!cachedData) {
+            return null;
+        }
+        
+        const parsed = JSON.parse(cachedData);
+        const size = new Blob([cachedData]).size;
+        
+        return {
+            macros: Object.keys(parsed.macros || {}).length,
+            missions: Object.keys(parsed.missions || {}).length,
+            savedAt: parsed.savedAt,
+            size: size
+        };
+    } catch (error) {
+        console.error('캐시 정보 조회 실패:', error);
+        return null;
+    }
 }
 
 // 매크로 키 생성
@@ -152,6 +271,8 @@ function setMacro(key, text, food = '', memo = '') {
         food: food,
         memo: memo
     };
+    // 자동 캐시 저장
+    saveToCacheQuiet();
 }
 
 // 매크로 삭제
@@ -170,6 +291,9 @@ function deleteMacroData(key) {
         missionsToDelete.forEach(missionKey => {
             delete macroData.missions[missionKey];
         });
+        
+        // 자동 캐시 저장
+        saveToCacheQuiet();
     }
 }
 
@@ -668,6 +792,9 @@ function confirmLinkMission() {
     
     macroData.missions[missionName] = currentMacroKey;
     
+    // 자동 캐시 저장
+    saveToCacheQuiet();
+    
     const modal = bootstrap.Modal.getInstance(document.getElementById('linkMissionModal'));
     modal.hide();
     
@@ -680,6 +807,9 @@ function confirmLinkMission() {
 function confirmUnlinkMission(missionName) {
     if (confirm(`'${missionName}' 임무 연결을 해제하시겠습니까?`)) {
         delete macroData.missions[missionName];
+        
+        // 자동 캐시 저장
+        saveToCacheQuiet();
         
         if (currentMacroKey) {
             viewMacro(currentMacroKey);
@@ -718,13 +848,16 @@ function importData(event) {
             
             if (confirm('기존 데이터를 새로운 데이터로 교체하시겠습니까?')) {
                 macroData = data;
+                // 새 데이터를 캐시에 저장
+                saveToCacheQuiet();
                 refreshMacroTable();
                 refreshMissionTable();
                 showMacroInfo('매크로를 선택하세요');
                 showAlert('데이터가 성공적으로 로드되었습니다.', 'success');
             }
         } catch (err) {
-            showAlert('잘못된 JSON 파일입니다.', 'danger');
+            console.error('JSON 파싱 오류:', err);
+            showAlert(`JSON 파일 오류: ${err.message}<br><br>💡 해결 방법:<br>1. 파일이 UTF-8 인코딩인지 확인<br>2. debug.html로 파일 검증<br>3. 따옴표와 중괄호가 제대로 닫혔는지 확인`, 'danger');
         }
     };
     reader.readAsText(file);
@@ -747,6 +880,8 @@ function loadJsonData() {
         
         if (confirm('기존 데이터를 새로운 데이터로 교체하시겠습니까?')) {
             macroData = data;
+            // 새 데이터를 캐시에 저장
+            saveToCacheQuiet();
             refreshMacroTable();
             refreshMissionTable();
             showMacroInfo('매크로를 선택하세요');
@@ -757,7 +892,43 @@ function loadJsonData() {
             showAlert('데이터가 성공적으로 로드되었습니다.', 'success');
         }
     } catch (err) {
-        showAlert('잘못된 JSON 형식입니다.', 'danger');
+        console.error('JSON 파싱 오류:', err);
+        showAlert(`JSON 형식 오류: ${err.message}<br><br>💡 해결 방법:<br>1. JSON 구문이 올바른지 확인<br>2. debug.html로 검증<br>3. 특수문자가 제대로 이스케이프되었는지 확인`, 'danger');
+    }
+}
+
+// 캐시 정보 표시
+function showCacheInfo() {
+    const info = getCacheInfo();
+    if (!info) {
+        showAlert('캐시된 데이터가 없습니다.', 'info');
+        return;
+    }
+    
+    const sizeKB = (info.size / 1024).toFixed(2);
+    const savedDate = new Date(info.savedAt).toLocaleString('ko-KR');
+    
+    const message = `
+        <strong>캐시 정보</strong><br>
+        📄 매크로: ${info.macros}개<br>
+        📋 임무: ${info.missions}개<br>
+        💾 용량: ${sizeKB} KB<br>
+        🕒 저장 시간: ${savedDate}
+    `;
+    
+    showAlert(message, 'info');
+}
+
+// 캐시 삭제 확인
+function confirmClearCache() {
+    const info = getCacheInfo();
+    if (!info) {
+        showAlert('삭제할 캐시 데이터가 없습니다.', 'info');
+        return;
+    }
+    
+    if (confirm(`캐시된 데이터를 모두 삭제하시겠습니까?\n\n매크로: ${info.macros}개\n임무: ${info.missions}개\n\n⚠️ 이 작업은 되돌릴 수 없습니다.`)) {
+        clearCache();
     }
 }
 
