@@ -38,29 +38,34 @@ document.addEventListener('DOMContentLoaded', function() {
 // 이벤트 리스너 등록
 function registerEventListeners() {
     // 검색 필드에서 엔터키
-    document.getElementById('searchProgress').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') searchMacros();
-    });
-    
-    // 작업량 입력 변화 감지
-    document.getElementById('searchProgress').addEventListener('input', function(e) {
-        const createBtn = document.getElementById('createWithProgressBtn');
-        if (e.target.value.trim()) {
-            createBtn.style.display = 'inline-block';
-        } else {
-            createBtn.style.display = 'none';
-        }
-    });
-    
-    // 정렬 변경 시 테이블 새로고침
-    document.getElementById('sortBy').addEventListener('change', refreshMacroTable);
+    const searchProgress = document.getElementById('searchProgress');
+    if (searchProgress) {
+        searchProgress.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchMacros();
+        });
+        
+        // 작업량 입력 변화 감지
+        searchProgress.addEventListener('input', function(e) {
+            const createBtn = document.getElementById('createWithProgressBtn');
+            if (createBtn) {
+                if (e.target.value.trim()) {
+                    createBtn.style.display = 'inline-block';
+                } else {
+                    createBtn.style.display = 'none';
+                }
+            }
+        });
+    }
     
     // 매크로 생성 탭의 입력 필드에서 엔터키
     const inputFields = ['inputProgress', 'inputMaxQuality', 'inputInitialQuality', 'inputDurability'];
     inputFields.forEach(fieldId => {
-        document.getElementById(fieldId).addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') loadMacro();
-        });
+        const element = document.getElementById(fieldId);
+        if (element) {
+            element.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') loadMacro();
+            });
+        }
     });
     
     // Ctrl+S로 저장
