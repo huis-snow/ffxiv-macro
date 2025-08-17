@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 이벤트 리스너 등록
     registerEventListeners();
     
-    // 초기 테이블 로드
-    refreshMacroTable();
+    // 모든 매크로 표시 (초기 로딩 시)
+    loadAllMacros();
     
     // 페이지 언로드 시 자동 저장
     window.addEventListener('beforeunload', function() {
@@ -330,7 +330,7 @@ function getAllMacros() {
     return result;
 }
 
-// 매크로 테이블 새로고침
+// 매크로 테이블 새로고침 (전체 버튼용)
 function refreshMacroTable() {
     // 작업량 검색 필드 초기화
     document.getElementById('searchProgress').value = '';
@@ -342,6 +342,13 @@ function refreshMacroTable() {
     }
     
     // 정렬 아이콘 초기화 및 테이블 렌더링
+    updateSortIcons();
+    renderSortedTable();
+}
+
+// 매크로 테이블 렌더링 (검색 필드 건드리지 않음)
+function loadAllMacros() {
+    console.log('loadAllMacros 호출됨, 매크로 개수:', Object.keys(macroData.macros).length);
     updateSortIcons();
     renderSortedTable();
 }
