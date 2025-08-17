@@ -991,7 +991,6 @@ function saveMacro() {
         
         viewMacro(macroKey);
         refreshMacroTable();
-        refreshMissionTable();
         showAlert('매크로가 저장되었습니다.', 'success');
     } catch (e) {
         console.error('saveMacro 오류:', e);
