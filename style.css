@@ -325,3 +325,295 @@ body {
     border-color: #0d6efd;
 }
 
+/* ============================================
+   다크모드 스타일
+   ============================================ */
+
+/* 다크모드 기본 색상 변수 */
+body.dark-mode {
+    --bs-body-bg: #1a1a1a;
+    --bs-body-color: #e9ecef;
+    --bs-dark: #343a40;
+    --bs-light: #f8f9fa;
+    --bs-border-color: #404040;
+    --bs-card-bg: #2d3748;
+    --bs-card-border: #4a5568;
+    --bs-table-bg: #2d3748;
+    --bs-table-hover-bg: #4a5568;
+    --bs-input-bg: #2d3748;
+    --bs-input-border: #4a5568;
+    --bs-input-focus-border: #86b7fe;
+    --bs-modal-bg: #2d3748;
+    --bs-dropdown-bg: #2d3748;
+    --bs-nav-tabs-bg: #2d3748;
+}
+
+/* 다크모드 전체 배경 */
+body.dark-mode {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* 다크모드 카드 */
+body.dark-mode .card {
+    background-color: var(--bs-card-bg) !important;
+    border-color: var(--bs-card-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .card-header {
+    background-color: #374151 !important;
+    border-bottom-color: var(--bs-card-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* 다크모드 테이블 */
+body.dark-mode .table {
+    --bs-table-bg: var(--bs-table-bg);
+    --bs-table-color: var(--bs-body-color);
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .table th,
+body.dark-mode .table td {
+    border-color: var(--bs-card-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .table-light {
+    --bs-table-bg: #374151;
+    --bs-table-color: var(--bs-body-color);
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+    background-color: var(--bs-table-hover-bg) !important;
+}
+
+body.dark-mode .table tbody tr.table-active {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+body.dark-mode .table tbody tr.table-active:hover {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* 다크모드 폼 요소 */
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: var(--bs-input-bg) !important;
+    border-color: var(--bs-input-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+    background-color: var(--bs-input-bg) !important;
+    border-color: var(--bs-input-focus-border) !important;
+    color: var(--bs-body-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #9ca3af !important;
+}
+
+/* 다크모드 버튼 */
+body.dark-mode .btn-outline-secondary {
+    color: #9ca3af;
+    border-color: #4a5568;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: #4a5568;
+    border-color: #4a5568;
+    color: #fff;
+}
+
+/* 다크모드 네비게이션 */
+body.dark-mode .nav-tabs {
+    border-bottom-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .nav-tabs .nav-link {
+    color: #9ca3af !important;
+    border-color: transparent !important;
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+    background-color: var(--bs-nav-tabs-bg) !important;
+    border-color: var(--bs-card-border) var(--bs-card-border) var(--bs-nav-tabs-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .nav-tabs .nav-link:hover {
+    border-color: var(--bs-card-border) var(--bs-card-border) var(--bs-card-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* 다크모드 모달 */
+body.dark-mode .modal-content {
+    background-color: var(--bs-modal-bg) !important;
+    color: var(--bs-body-color) !important;
+    border-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .modal-header {
+    border-bottom-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .modal-footer {
+    border-top-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .btn-close {
+    filter: invert(1);
+}
+
+/* 다크모드 드롭다운 */
+body.dark-mode .dropdown-menu {
+    background-color: var(--bs-dropdown-bg) !important;
+    border-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .dropdown-item {
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .dropdown-item:hover,
+body.dark-mode .dropdown-item:focus {
+    background-color: #4a5568 !important;
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .dropdown-divider {
+    border-top-color: var(--bs-card-border) !important;
+}
+
+/* 다크모드 알림 */
+body.dark-mode .alert {
+    border-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .alert-info {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    color: #bfdbfe !important;
+}
+
+body.dark-mode .alert-success {
+    background-color: rgba(34, 197, 94, 0.2) !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    color: #bbf7d0 !important;
+}
+
+body.dark-mode .alert-warning {
+    background-color: rgba(251, 191, 36, 0.2) !important;
+    border-color: rgba(251, 191, 36, 0.3) !important;
+    color: #fef3c7 !important;
+}
+
+body.dark-mode .alert-danger {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #fecaca !important;
+}
+
+/* 다크모드 매크로 블록 */
+body.dark-mode .macro-block {
+    background-color: var(--bs-card-bg) !important;
+    border-color: var(--bs-card-border) !important;
+}
+
+body.dark-mode .macro-block-header {
+    background-color: #374151 !important;
+    border-bottom-color: var(--bs-card-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+body.dark-mode .macro-block-text {
+    background-color: var(--bs-input-bg) !important;
+    border-color: var(--bs-input-border) !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* 다크모드 스크롤바 */
+body.dark-mode ::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #6b7280;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* 다크모드 텍스트 색상 */
+body.dark-mode .text-muted {
+    color: #9ca3af !important;
+}
+
+body.dark-mode .text-primary {
+    color: #60a5fa !important;
+}
+
+body.dark-mode .text-success {
+    color: #34d399 !important;
+}
+
+body.dark-mode .text-warning {
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .text-danger {
+    color: #f87171 !important;
+}
+
+body.dark-mode .text-info {
+    color: #60a5fa !important;
+}
+
+/* 다크모드 체크박스 */
+body.dark-mode .form-check-input {
+    background-color: var(--bs-input-bg) !important;
+    border-color: var(--bs-input-border) !important;
+}
+
+body.dark-mode .form-check-input:checked {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
+
+body.dark-mode .form-check-label {
+    color: var(--bs-body-color) !important;
+}
+
+/* 다크모드 테마 토글 버튼 애니메이션 */
+#themeToggle {
+    transition: all 0.3s ease;
+}
+
+#themeToggle:hover {
+    transform: scale(1.1);
+}
+
+#themeToggle i {
+    transition: all 0.3s ease;
+}
+
+/* 다크모드 전환 애니메이션 */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card,
+.modal-content,
+.dropdown-menu,
+.form-control,
+.form-select,
+.table,
+.nav-tabs .nav-link {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+

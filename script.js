@@ -8,6 +8,7 @@ var currentMacroKey = null;
 
 // localStorage 키
 const STORAGE_KEY = 'ffxiv_macro_data';
+const THEME_STORAGE_KEY = 'ffxiv_theme_preference';
 
 // 정렬 상태
 let currentSort = {
@@ -17,6 +18,9 @@ let currentSort = {
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
+    // 테마 설정 로드
+    loadThemePreference();
+    
     // 캐시된 데이터 로드
     loadCachedData();
     
@@ -1155,6 +1159,51 @@ function confirmClearCache() {
     
     if (confirm(`캐시된 데이터를 모두 삭제하시겠습니까?\n\n매크로: ${info.macros}개\n임무: ${info.missions}개\n\n⚠️ 이 작업은 되돌릴 수 없습니다.`)) {
         clearCache();
+    }
+}
+
+// 다크모드 관련 함수들
+function loadThemePreference() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'dark') {
+        enableDarkMode();
+    } else {
+        enableLightMode();
+    }
+}
+
+function toggleDarkMode() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    if (isDarkMode) {
+        enableLightMode();
+    } else {
+        enableDarkMode();
+    }
+}
+
+function enableDarkMode() {
+    document.body.classList.add('dark-mode');
+    localStorage.setItem(THEME_STORAGE_KEY, 'dark');
+    updateThemeToggleButton(true);
+}
+
+function enableLightMode() {
+    document.body.classList.remove('dark-mode');
+    localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    updateThemeToggleButton(false);
+}
+
+function updateThemeToggleButton(isDarkMode) {
+    const toggleBtn = document.getElementById('themeToggle');
+    if (toggleBtn) {
+        const icon = toggleBtn.querySelector('i');
+        if (isDarkMode) {
+            icon.className = 'bi bi-sun-fill';
+            toggleBtn.title = '라이트 모드로 전환';
+        } else {
+            icon.className = 'bi bi-moon-fill';
+            toggleBtn.title = '다크 모드로 전환';
+        }
     }
 }
 
