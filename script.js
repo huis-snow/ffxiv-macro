@@ -288,14 +288,16 @@ function getMacro(key) {
         return {
             text: foundMacro,
             food: '',
-            memo: ''
+            memo: '',
+            masterPotion: false
         };
     }
     
     return {
         text: foundMacro.text || '',
         food: foundMacro.food || '',
-        memo: foundMacro.memo || ''
+        memo: foundMacro.memo || '',
+        masterPotion: foundMacro.masterPotion || false
     };
 }
 
@@ -953,9 +955,17 @@ function loadMacroToForm(parsed, macro) {
         document.getElementById('inputInitialQuality').value = parsed.initialQuality;
         document.getElementById('inputDurability').value = parsed.durability;
         
-        // 음식, 명인의 약액 및 메모
+        // 음식 설정
         document.getElementById('inputFood').value = macro.food || '';
-        document.getElementById('inputMasterPotion').checked = macro.masterPotion || false;
+        
+        // 명인의 약액 체크박스 설정
+        const masterPotionCheckbox = document.getElementById('inputMasterPotion');
+        if (masterPotionCheckbox) {
+            masterPotionCheckbox.checked = Boolean(macro.masterPotion);
+            console.log('명인의 약액 체크박스 설정:', macro.masterPotion, '→', masterPotionCheckbox.checked);
+        }
+        
+        // 메모 설정
         document.getElementById('inputMemo').value = macro.memo || '';
         
         // 매크로 텍스트
@@ -967,6 +977,7 @@ function loadMacroToForm(parsed, macro) {
             initialQuality: parsed.initialQuality,
             durability: parsed.durability,
             food: macro.food,
+            masterPotion: macro.masterPotion,
             memo: macro.memo
         });
         
@@ -1011,12 +1022,24 @@ function loadMacro() {
             document.getElementById('inputFood').value = macro.food || '';
             document.getElementById('inputMemo').value = macro.memo || '';
             
+            // 명인의 약액 체크박스 설정
+            const masterPotionCheckbox = document.getElementById('inputMasterPotion');
+            if (masterPotionCheckbox) {
+                masterPotionCheckbox.checked = Boolean(macro.masterPotion);
+            }
+            
             viewMacro(macroKey);
             showAlert('기존 매크로를 불러왔습니다.', 'success');
         } else {
             document.getElementById('macroText').value = '';
             document.getElementById('inputFood').value = '';
             document.getElementById('inputMemo').value = '';
+            
+            // 명인의 약액 체크박스 초기화
+            const masterPotionCheckbox = document.getElementById('inputMasterPotion');
+            if (masterPotionCheckbox) {
+                masterPotionCheckbox.checked = false;
+            }
             
             showMacroInfo('매크로를 선택하세요');
             showAlert('새로운 매크로를 입력하세요.', 'info');
