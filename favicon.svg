@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- 배경 원 -->
+  <circle cx="16" cy="16" r="15" fill="#fff3e0" stroke="#ff8c00" stroke-width="2"/>
+  
+  <!-- 당근 몸통 -->
+  <g>
+    <!-- 당근 메인 몸체 -->
+    <path d="M 16 10 Q 20 12 20 18 Q 20 24 16 26 Q 12 24 12 18 Q 12 12 16 10 Z" 
+          fill="#ff6600" stroke="#e55100" stroke-width="1"/>
+    
+    <!-- 당근 하이라이트 -->
+    <path d="M 14 12 Q 17 13 17 16 Q 17 20 15 22" 
+          stroke="#ff9933" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- 당근 잎사귀 -->
+  <g fill="#4caf50" stroke="#388e3c" stroke-width="1">
+    <!-- 중앙 잎 -->
+    <path d="M 16 10 Q 16 6 15 4 Q 16 3 17 4 Q 16 6 16 10" fill="#4caf50"/>
+    
+    <!-- 왼쪽 잎 -->
+    <path d="M 15 9 Q 13 7 11 5 Q 12 4 13 5 Q 15 7 15 9" fill="#66bb6a"/>
+    
+    <!-- 오른쪽 잎 -->
+    <path d="M 17 9 Q 19 7 21 5 Q 20 4 19 5 Q 17 7 17 9" fill="#66bb6a"/>
+    
+    <!-- 추가 작은 잎들 -->
+    <path d="M 14 8 Q 12 6 10 6 Q 11 5 12 6 Q 14 7 14 8" fill="#81c784"/>
+    <path d="M 18 8 Q 20 6 22 6 Q 21 5 20 6 Q 18 7 18 8" fill="#81c784"/>
+  </g>
+  
+  <!-- 당근 얼굴 -->
+  <!-- 눈 -->
+  <g fill="#333333">
+    <circle cx="14" cy="16" r="1"/>
+    <circle cx="18" cy="16" r="1"/>
+  </g>
+  
+  <!-- 눈 하이라이트 -->
+  <g fill="#ffffff">
+    <circle cx="14.3" cy="15.7" r="0.3"/>
+    <circle cx="18.3" cy="15.7" r="0.3"/>
+  </g>
+  
+  <!-- 입 (귀여운 미소) -->
+  <path d="M 14 19 Q 16 20.5 18 19" 
+        stroke="#d84315" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- 볼 홍조 -->
+  <g fill="#ff9800" opacity="0.4">
+    <circle cx="12.5" cy="18" r="1"/>
+    <circle cx="19.5" cy="18" r="1"/>
+  </g>
+  
+  <!-- 당근 줄무늬 -->
+  <g stroke="#e55100" stroke-width="0.8" opacity="0.6">
+    <path d="M 13 14 Q 16 14.5 19 14" stroke-linecap="round"/>
+    <path d="M 13 20 Q 16 20.5 19 20" stroke-linecap="round"/>
+    <path d="M 14 22 Q 16 22.3 18 22" stroke-linecap="round"/>
+  </g>
+  
+  <!-- 작은 반짝이 -->
+  <g fill="#ffeb3b" opacity="0.8">
+    <circle cx="6" cy="8" r="0.5"/>
+    <circle cx="26" cy="12" r="0.6"/>
+    <circle cx="24" cy="26" r="0.4"/>
+  </g>
+</svg>
