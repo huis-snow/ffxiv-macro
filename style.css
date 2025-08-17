@@ -84,6 +84,25 @@ body {
     margin-right: 0;
 }
 
+/* 정렬 가능한 헤더 스타일 */
+.table th.sortable {
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.table th.sortable:hover {
+    background-color: rgba(0,123,255,.1);
+}
+
+/* 선택된 행 하이라이트 */
+.table tbody tr.table-active {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.table tbody tr.table-active:hover {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
 /* 매크로 블록 스타일 */
 .macro-block {
     border: 1px solid #dee2e6;

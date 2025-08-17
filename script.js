@@ -9,6 +9,12 @@ var currentMacroKey = null;
 // localStorage 키
 const STORAGE_KEY = 'ffxiv_macro_data';
 
+// 정렬 상태
+let currentSort = {
+    column: 'progress',
+    direction: 'asc' // asc, desc
+};
+
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
     // 캐시된 데이터 로드
@@ -326,24 +332,27 @@ function getAllMacros() {
 
 // 매크로 테이블 새로고침
 function refreshMacroTable() {
-    const tbody = document.getElementById('macroTableBody');
-    tbody.innerHTML = '';
+    // 작업량 검색 필드 초기화
+    document.getElementById('searchProgress').value = '';
     
-    const macros = getAllMacros();
-    const sortBy = document.getElementById('sortBy').value;
+    // 매크로 생성 버튼 숨기기
+    const createBtn = document.getElementById('createWithProgressBtn');
+    if (createBtn) {
+        createBtn.style.display = 'none';
+    }
     
-    macros.sort((a, b) => a[sortBy] - b[sortBy]);
-    
-    macros.forEach(macro => {
-        const row = createMacroTableRow(macro);
-        tbody.appendChild(row);
-    });
+    // 정렬 아이콘 초기화 및 테이블 렌더링
+    updateSortIcons();
+    renderSortedTable();
 }
 
 // 매크로 테이블 행 생성
 function createMacroTableRow(macro) {
     const row = document.createElement('tr');
     row.innerHTML = `
+        <td>
+            <button class="btn btn-sm btn-primary" onclick="selectMacro('${macro.key}', this)">선택</button>
+        </td>
         <td>${macro.progress}</td>
         <td>${macro.maxQuality}</td>
         <td>${macro.initialQuality}</td>
@@ -351,9 +360,6 @@ function createMacroTableRow(macro) {
         <td>${macro.food || '-'}</td>
         <td>${macro.memo || '-'}</td>
         <td>
-            <button class="btn btn-sm btn-outline-primary me-1" onclick="viewMacro('${macro.key}')" title="보기">
-                <i class="bi bi-eye"></i>
-            </button>
             <button class="btn btn-sm btn-outline-success me-1" onclick="editMacro('${macro.key}')" title="수정">
                 <i class="bi bi-pencil"></i>
             </button>
@@ -363,8 +369,16 @@ function createMacroTableRow(macro) {
         </td>
     `;
     
-    // 더블클릭으로 보기
-    row.addEventListener('dblclick', () => viewMacro(macro.key));
+    // 행 클릭으로 선택
+    row.addEventListener('click', (e) => {
+        // 버튼이 아닌 곳을 클릭했을 때만 선택
+        if (!e.target.closest('button')) {
+            selectMacro(macro.key, row);
+        }
+    });
+    
+    // 매크로 키를 데이터 속성으로 저장
+    row.dataset.macroKey = macro.key;
     
     return row;
 }
@@ -382,8 +396,26 @@ function searchMacros() {
         return true;
     });
     
-    const sortBy = document.getElementById('sortBy').value;
-    filteredMacros.sort((a, b) => a[sortBy] - b[sortBy]);
+    // 정렬 적용
+    filteredMacros.sort((a, b) => {
+        let aVal = a[currentSort.column];
+        let bVal = b[currentSort.column];
+        
+        // 숫자 정렬
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+        
+        // 문자열 정렬
+        aVal = String(aVal || '').toLowerCase();
+        bVal = String(bVal || '').toLowerCase();
+        
+        if (currentSort.direction === 'asc') {
+            return aVal.localeCompare(bVal);
+        } else {
+            return bVal.localeCompare(aVal);
+        }
+    });
     
     filteredMacros.forEach(macro => {
         const row = createMacroTableRow(macro);
@@ -422,6 +454,99 @@ function createMacroWithProgress() {
     }
 }
 
+// 테이블 정렬
+function sortTable(column) {
+    // 같은 컬럼을 클릭하면 방향 변경, 다른 컬럼이면 오름차순으로 시작
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+    }
+    
+    // 헤더 아이콘 업데이트
+    updateSortIcons();
+    
+    // 테이블 정렬 및 재렌더링
+    renderSortedTable();
+}
+
+// 정렬 아이콘 업데이트
+function updateSortIcons() {
+    // 모든 정렬 아이콘 초기화
+    ['progress', 'maxQuality', 'initialQuality', 'durability'].forEach(col => {
+        const icon = document.getElementById(`sort-${col}`);
+        if (icon) {
+            icon.className = 'bi bi-arrow-down-up';
+        }
+    });
+    
+    // 현재 정렬 컬럼의 아이콘 업데이트
+    const currentIcon = document.getElementById(`sort-${currentSort.column}`);
+    if (currentIcon) {
+        currentIcon.className = currentSort.direction === 'asc' 
+            ? 'bi bi-arrow-up' 
+            : 'bi bi-arrow-down';
+    }
+}
+
+// 정렬된 테이블 렌더링
+function renderSortedTable() {
+    const tbody = document.getElementById('macroTableBody');
+    tbody.innerHTML = '';
+    
+    const macros = getAllMacros();
+    
+    // 정렬
+    macros.sort((a, b) => {
+        let aVal = a[currentSort.column];
+        let bVal = b[currentSort.column];
+        
+        // 숫자 정렬
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+        
+        // 문자열 정렬
+        aVal = String(aVal || '').toLowerCase();
+        bVal = String(bVal || '').toLowerCase();
+        
+        if (currentSort.direction === 'asc') {
+            return aVal.localeCompare(bVal);
+        } else {
+            return bVal.localeCompare(aVal);
+        }
+    });
+    
+    macros.forEach(macro => {
+        const row = createMacroTableRow(macro);
+        tbody.appendChild(row);
+    });
+}
+
+// 매크로 선택 (하이라이트 + 첫 블록 복사)
+function selectMacro(macroKey, element) {
+    // 기존 하이라이트 제거
+    document.querySelectorAll('#macroTableBody tr').forEach(row => {
+        row.classList.remove('table-active');
+    });
+    
+    // 새로운 하이라이트 적용
+    let targetRow = element;
+    if (element.tagName === 'BUTTON') {
+        targetRow = element.closest('tr');
+    }
+    if (targetRow) {
+        targetRow.classList.add('table-active');
+    }
+    
+    // 매크로 정보 표시
+    viewMacro(macroKey);
+    
+    // 첫 번째 블록 자동 복사
+    copyFirstBlock(macroKey);
+}
+
 // 매크로 보기
 function viewMacro(macroKey) {
     currentMacroKey = macroKey;
@@ -437,6 +562,29 @@ function viewMacro(macroKey) {
         showMacroDetails(parsed, macro, macroKey);
     } catch (e) {
         showMacroInfo('키 파싱 오류');
+    }
+}
+
+// 첫 번째 블록 자동 복사
+function copyFirstBlock(macroKey) {
+    try {
+        const macro = getMacro(macroKey);
+        if (!macro || !macro.text) {
+            return;
+        }
+        
+        const lines = macro.text.split('\n');
+        const blockSize = 15;
+        const firstBlockLines = lines.slice(0, blockSize);
+        const firstBlockText = firstBlockLines.join('\n');
+        
+        navigator.clipboard.writeText(firstBlockText).then(() => {
+            showAlert('첫 번째 블록이 클립보드에 복사되었습니다.', 'success');
+        }).catch(err => {
+            console.error('클립보드 복사 오류:', err);
+        });
+    } catch (error) {
+        console.error('첫 번째 블록 복사 오류:', error);
     }
 }
 
