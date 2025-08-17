@@ -460,7 +460,7 @@ function createMissionTableRow(missionName, macroKey) {
                 <i class="bi bi-pencil"></i>
             </button>
             <button class="btn btn-sm btn-outline-danger" onclick="confirmUnlinkMission('${missionName}')" title="연결 해제">
-                <i class="bi bi-unlink"></i>
+                <i class="bi bi-x"></i>
             </button>
         </td>
     `;
