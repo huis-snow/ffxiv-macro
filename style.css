@@ -75,6 +75,15 @@ body {
     font-size: 0.75rem;
 }
 
+/* 테이블 내 버튼 간격 */
+.table td .btn {
+    margin-right: 0.25rem;
+}
+
+.table td .btn:last-child {
+    margin-right: 0;
+}
+
 /* 매크로 블록 스타일 */
 .macro-block {
     border: 1px solid #dee2e6;

@@ -371,6 +371,9 @@ function createMacroTableRow(macro) {
             <button class="btn btn-sm btn-outline-primary me-1" onclick="viewMacro('${macro.key}')" title="보기">
                 <i class="bi bi-eye"></i>
             </button>
+            <button class="btn btn-sm btn-outline-success me-1" onclick="editMacro('${macro.key}')" title="수정">
+                <i class="bi bi-pencil"></i>
+            </button>
             <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteMacro('${macro.key}')" title="삭제">
                 <i class="bi bi-trash"></i>
             </button>
@@ -453,6 +456,9 @@ function createMissionTableRow(missionName, macroKey) {
             <button class="btn btn-sm btn-outline-primary me-1" onclick="viewMacroFromMission('${macroKey}')" title="매크로 보기">
                 <i class="bi bi-eye"></i>
             </button>
+            <button class="btn btn-sm btn-outline-success me-1" onclick="editMacro('${macroKey}')" title="매크로 수정">
+                <i class="bi bi-pencil"></i>
+            </button>
             <button class="btn btn-sm btn-outline-danger" onclick="confirmUnlinkMission('${missionName}')" title="연결 해제">
                 <i class="bi bi-unlink"></i>
             </button>
@@ -517,7 +523,12 @@ function showMacroDetails(parsed, macro, macroKey) {
     
     infoDiv.innerHTML = `
         <div class="mb-3">
-            <h6 class="text-primary mb-2">기본 정보</h6>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="text-primary mb-0">기본 정보</h6>
+                <button class="btn btn-sm btn-outline-success" onclick="editMacro('${macroKey}')" title="매크로 수정">
+                    <i class="bi bi-pencil"></i> 수정
+                </button>
+            </div>
             <div class="small">
                 <div><strong>작업량:</strong> ${parsed.progress}</div>
                 <div><strong>최대품질:</strong> ${parsed.maxQuality}</div>
@@ -678,6 +689,71 @@ function updateMacroMemo(macroKey, memo) {
     const macro = getMacro(macroKey);
     if (macro) {
         setMacro(macroKey, macro.text, macro.food, memo);
+    }
+}
+
+// 매크로 수정 (매크로 생성 탭으로 이동하며 데이터 로딩)
+function editMacro(macroKey) {
+    try {
+        // 매크로 데이터 가져오기
+        const macro = getMacro(macroKey);
+        if (!macro) {
+            showAlert('매크로 데이터를 찾을 수 없습니다.', 'danger');
+            return;
+        }
+        
+        // 매크로 키 파싱
+        const parsed = parseMacroKey(macroKey);
+        
+        // 매크로 생성 탭으로 이동
+        const createTab = document.querySelector('#create-tab');
+        if (createTab) {
+            // Bootstrap 탭 활성화
+            const tabTrigger = new bootstrap.Tab(createTab);
+            tabTrigger.show();
+        }
+        
+        // 잠시 후 폼에 데이터 로딩 (탭 전환이 완료된 후)
+        setTimeout(() => {
+            loadMacroToForm(parsed, macro);
+        }, 100);
+        
+        showAlert('매크로 수정 모드로 전환되었습니다.', 'info');
+        
+    } catch (error) {
+        console.error('매크로 수정 오류:', error);
+        showAlert('매크로 수정 중 오류가 발생했습니다.', 'danger');
+    }
+}
+
+// 폼에 매크로 데이터 로딩
+function loadMacroToForm(parsed, macro) {
+    try {
+        // 기본 정보 입력
+        document.getElementById('inputProgress').value = parsed.progress;
+        document.getElementById('inputMaxQuality').value = parsed.maxQuality;
+        document.getElementById('inputInitialQuality').value = parsed.initialQuality;
+        document.getElementById('inputDurability').value = parsed.durability;
+        
+        // 음식 및 메모
+        document.getElementById('inputFood').value = macro.food || '';
+        document.getElementById('inputMemo').value = macro.memo || '';
+        
+        // 매크로 텍스트
+        document.getElementById('macroText').value = macro.text || '';
+        
+        console.log('매크로 데이터가 폼에 로딩되었습니다:', {
+            progress: parsed.progress,
+            maxQuality: parsed.maxQuality,
+            initialQuality: parsed.initialQuality,
+            durability: parsed.durability,
+            food: macro.food,
+            memo: macro.memo
+        });
+        
+    } catch (error) {
+        console.error('폼 로딩 오류:', error);
+        showAlert('폼에 데이터를 로딩하는 중 오류가 발생했습니다.', 'warning');
     }
 }
 
