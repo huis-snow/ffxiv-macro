@@ -575,6 +575,14 @@ function createMacroBlocks(macroText) {
         const blockText = blockLines.join('\n');
         const blockNum = Math.floor(i / blockSize) + 1;
         
+        // HTML과 특수문자를 안전하게 이스케이프
+        const escapedText = blockText
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+        
         blocksHtml += `
             <div class="macro-block">
                 <div class="macro-block-header">
@@ -583,13 +591,13 @@ function createMacroBlocks(macroText) {
                         <button class="btn btn-sm btn-outline-secondary me-1" onclick="toggleBlock(${blockNum})" id="toggleBtn${blockNum}">
                             펼치기
                         </button>
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyBlockText(\`${blockText.replace(/`/g, '\\`')}\`, ${blockNum})">
+                        <button class="btn btn-sm btn-outline-primary" onclick="copyBlockTextSafe(${blockNum})">
                             복사
                         </button>
                     </div>
                 </div>
                 <div class="macro-block-content" id="blockContent${blockNum}" style="display: none;">
-                    <div class="macro-block-text">${blockText}</div>
+                    <div class="macro-block-text">${escapedText}</div>
                 </div>
             </div>
         `;
@@ -612,7 +620,41 @@ function toggleBlock(blockNum) {
     }
 }
 
-// 블록 텍스트 복사
+// 안전한 블록 텍스트 복사
+function copyBlockTextSafe(blockNum) {
+    try {
+        // 전역 변수에서 현재 매크로의 원본 텍스트를 가져옴
+        if (!currentMacroKey) {
+            showAlert('매크로를 선택하세요.', 'warning');
+            return;
+        }
+        
+        const macro = getMacro(currentMacroKey);
+        if (!macro) {
+            showAlert('매크로 데이터를 찾을 수 없습니다.', 'danger');
+            return;
+        }
+        
+        const lines = macro.text.split('\n');
+        const blockSize = 15;
+        const startIndex = (blockNum - 1) * blockSize;
+        const endIndex = Math.min(startIndex + blockSize, lines.length);
+        const blockLines = lines.slice(startIndex, endIndex);
+        const blockText = blockLines.join('\n');
+        
+        navigator.clipboard.writeText(blockText).then(() => {
+            showAlert(`블록 ${blockNum}이 클립보드에 복사되었습니다.`, 'success');
+        }).catch(err => {
+            console.error('클립보드 복사 오류:', err);
+            showAlert('복사에 실패했습니다.', 'danger');
+        });
+    } catch (error) {
+        console.error('복사 함수 오류:', error);
+        showAlert('복사 중 오류가 발생했습니다.', 'danger');
+    }
+}
+
+// 레거시 블록 텍스트 복사 (혹시 다른 곳에서 사용 중일 수 있음)
 function copyBlockText(text, blockNum) {
     navigator.clipboard.writeText(text).then(() => {
         showAlert(`블록 ${blockNum}이 클립보드에 복사되었습니다.`, 'success');
