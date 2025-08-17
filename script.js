@@ -283,11 +283,12 @@ function getMacro(key) {
 }
 
 // 매크로 저장
-function setMacro(key, text, food = '', memo = '') {
+function setMacro(key, text, food = '', memo = '', masterPotion = false) {
     macroData.macros[key] = {
         text: text,
         food: food,
-        memo: memo
+        memo: memo,
+        masterPotion: masterPotion
     };
     // 자동 캐시 저장
     saveToCacheQuiet();
@@ -313,12 +314,14 @@ function getAllMacros() {
             
             let food = '';
             let memo = '';
+            let masterPotion = false;
             
             if (typeof macro === 'string') {
                 // 레거시 형식
             } else if (typeof macro === 'object') {
                 food = macro.food || '';
                 memo = macro.memo || '';
+                masterPotion = macro.masterPotion || false;
             }
             
             result.push({
@@ -327,6 +330,7 @@ function getAllMacros() {
                 initialQuality: parsed.initialQuality,
                 durability: parsed.durability,
                 food: food,
+                masterPotion: masterPotion,
                 memo: memo,
                 key: key
             });
@@ -381,6 +385,7 @@ function createMacroTableRow(macro) {
         <td>${macro.initialQuality}</td>
         <td>${macro.durability}</td>
         <td>${macro.food || '-'}</td>
+        <td>${macro.masterPotion ? '✓' : '-'}</td>
         <td>${macro.memo || '-'}</td>
         <td>
             <button class="btn btn-sm btn-outline-success me-1" onclick="editMacro('${macro.key}')" title="수정">
@@ -530,7 +535,7 @@ function renderSortedTable() {
     if (macros.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="text-center text-muted p-4">
+                <td colspan="9" class="text-center text-muted p-4">
                     <i class="bi bi-inbox display-6 d-block mb-2"></i>
                     <div>저장된 매크로가 없습니다.</div>
                     <small>상단의 "데이터 가져오기" 버튼을 사용하거나 "매크로 생성" 탭에서 새로 만드세요.</small>
@@ -654,6 +659,7 @@ function showMacroDetails(parsed, macro, macroKey) {
                 <div><strong>초기품질:</strong> ${parsed.initialQuality}</div>
                 <div><strong>내구도:</strong> ${parsed.durability}</div>
                 ${macro.food ? `<div><strong>음식:</strong> ${macro.food}</div>` : ''}
+                ${macro.masterPotion ? `<div><strong>명인의 약액:</strong> ✓</div>` : ''}
             </div>
         </div>
         
@@ -834,8 +840,9 @@ function loadMacroToForm(parsed, macro) {
         document.getElementById('inputInitialQuality').value = parsed.initialQuality;
         document.getElementById('inputDurability').value = parsed.durability;
         
-        // 음식 및 메모
+        // 음식, 명인의 약액 및 메모
         document.getElementById('inputFood').value = macro.food || '';
+        document.getElementById('inputMasterPotion').checked = macro.masterPotion || false;
         document.getElementById('inputMemo').value = macro.memo || '';
         
         // 매크로 텍스트
@@ -916,6 +923,7 @@ function saveMacro() {
         const text = document.getElementById('macroText').value.trim();
         const food = document.getElementById('inputFood').value;
         const memo = document.getElementById('inputMemo').value.trim();
+        const masterPotion = document.getElementById('inputMasterPotion').checked;
         
         console.log('매크로 키:', macroKey);
         console.log('매크로 텍스트:', text);
@@ -932,7 +940,7 @@ function saveMacro() {
         }
         
         console.log('setMacro 호출 전');
-        setMacro(macroKey, text, food, memo);
+        setMacro(macroKey, text, food, memo, masterPotion);
         console.log('setMacro 호출 후');
         
         viewMacro(macroKey);
@@ -986,6 +994,7 @@ function clearForm() {
     document.getElementById('inputInitialQuality').value = '0';
     document.getElementById('inputDurability').value = '';
     document.getElementById('inputFood').value = '';
+    document.getElementById('inputMasterPotion').checked = false;
     document.getElementById('inputMemo').value = '';
     document.getElementById('macroText').value = '';
     showMacroInfo('매크로를 선택하세요');
