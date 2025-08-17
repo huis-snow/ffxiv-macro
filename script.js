@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 초기 테이블 로드
     refreshMacroTable();
-    refreshMissionTable();
     
     // 페이지 언로드 시 자동 저장
     window.addEventListener('beforeunload', function() {
@@ -34,8 +33,14 @@ function registerEventListeners() {
         if (e.key === 'Enter') searchMacros();
     });
     
-    document.getElementById('searchMaxQuality').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') searchMacros();
+    // 작업량 입력 변화 감지
+    document.getElementById('searchProgress').addEventListener('input', function(e) {
+        const createBtn = document.getElementById('createWithProgressBtn');
+        if (e.target.value.trim()) {
+            createBtn.style.display = 'inline-block';
+        } else {
+            createBtn.style.display = 'none';
+        }
     });
     
     // 정렬 변경 시 테이블 새로고침
@@ -145,7 +150,6 @@ function clearCache() {
             missions: {}
         };
         refreshMacroTable();
-        refreshMissionTable();
         showMacroInfo('매크로를 선택하세요');
         showAlert('캐시가 삭제되었습니다.', 'success');
     } catch (error) {
@@ -280,18 +284,6 @@ function deleteMacroData(key) {
     if (macroData.macros[key]) {
         delete macroData.macros[key];
         
-        // 연결된 임무도 삭제
-        const missionsToDelete = [];
-        for (const [missionKey, macroKey] of Object.entries(macroData.missions)) {
-            if (macroKey === key) {
-                missionsToDelete.push(missionKey);
-            }
-        }
-        
-        missionsToDelete.forEach(missionKey => {
-            delete macroData.missions[missionKey];
-        });
-        
         // 자동 캐시 저장
         saveToCacheQuiet();
     }
@@ -300,12 +292,6 @@ function deleteMacroData(key) {
 // 모든 매크로 목록 가져오기
 function getAllMacros() {
     const result = [];
-    const missionCount = {};
-    
-    // 임무 연결 수 계산
-    for (const [missionKey, macroKey] of Object.entries(macroData.missions)) {
-        missionCount[macroKey] = (missionCount[macroKey] || 0) + 1;
-    }
     
     for (const [key, macro] of Object.entries(macroData.macros)) {
         try {
@@ -321,7 +307,6 @@ function getAllMacros() {
                 memo = macro.memo || '';
             }
             
-            const count = missionCount[key] || 0;
             result.push({
                 progress: parsed.progress,
                 maxQuality: parsed.maxQuality,
@@ -329,8 +314,7 @@ function getAllMacros() {
                 durability: parsed.durability,
                 food: food,
                 memo: memo,
-                key: key,
-                missionCount: count
+                key: key
             });
         } catch (e) {
             console.warn(`키 파싱 실패: ${key}`, e);
@@ -366,7 +350,6 @@ function createMacroTableRow(macro) {
         <td>${macro.durability}</td>
         <td>${macro.food || '-'}</td>
         <td>${macro.memo || '-'}</td>
-        <td><span class="badge bg-secondary">${macro.missionCount}</span></td>
         <td>
             <button class="btn btn-sm btn-outline-primary me-1" onclick="viewMacro('${macro.key}')" title="보기">
                 <i class="bi bi-eye"></i>
@@ -389,7 +372,6 @@ function createMacroTableRow(macro) {
 // 매크로 검색
 function searchMacros() {
     const progress = document.getElementById('searchProgress').value;
-    const maxQuality = document.getElementById('searchMaxQuality').value;
     
     const tbody = document.getElementById('macroTableBody');
     tbody.innerHTML = '';
@@ -397,7 +379,6 @@ function searchMacros() {
     const allMacros = getAllMacros();
     const filteredMacros = allMacros.filter(macro => {
         if (progress && macro.progress != parseInt(progress)) return false;
-        if (maxQuality && macro.maxQuality != parseInt(maxQuality)) return false;
         return true;
     });
     
@@ -410,84 +391,35 @@ function searchMacros() {
     });
 }
 
-// 임무 테이블 새로고침
-function refreshMissionTable() {
-    const tbody = document.getElementById('missionTableBody');
-    tbody.innerHTML = '';
+// 검색한 작업량으로 매크로 생성
+function createMacroWithProgress() {
+    const progress = document.getElementById('searchProgress').value.trim();
     
-    const missions = Object.entries(macroData.missions).sort((a, b) => a[0].localeCompare(b[0]));
-    
-    missions.forEach(([missionName, macroKey]) => {
-        const row = createMissionTableRow(missionName, macroKey);
-        tbody.appendChild(row);
-    });
-}
-
-// 임무 테이블 행 생성
-function createMissionTableRow(missionName, macroKey) {
-    const row = document.createElement('tr');
-    
-    const macro = getMacro(macroKey);
-    let progress = '?', maxQuality = '?', initialQuality = '?', durability = '?', memo = '';
-    
-    if (macro) {
-        try {
-            const parsed = parseMacroKey(macroKey);
-            progress = parsed.progress;
-            maxQuality = parsed.maxQuality;
-            initialQuality = parsed.initialQuality;
-            durability = parsed.durability;
-            memo = macro.memo || '';
-        } catch (e) {
-            memo = '파싱 오류';
-        }
-    } else {
-        memo = '매크로 없음';
+    if (!progress) {
+        showAlert('작업량을 입력하세요.', 'warning');
+        return;
     }
     
-    row.innerHTML = `
-        <td>${missionName}</td>
-        <td>${progress}</td>
-        <td>${maxQuality}</td>
-        <td>${initialQuality}</td>
-        <td>${durability}</td>
-        <td>${memo || '-'}</td>
-        <td>
-            <button class="btn btn-sm btn-outline-primary me-1" onclick="viewMacroFromMission('${macroKey}')" title="매크로 보기">
-                <i class="bi bi-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-success me-1" onclick="editMacro('${macroKey}')" title="매크로 수정">
-                <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" onclick="confirmUnlinkMission('${missionName}')" title="연결 해제">
-                <i class="bi bi-x"></i>
-            </button>
-        </td>
-    `;
-    
-    // 더블클릭으로 매크로 보기
-    row.addEventListener('dblclick', () => viewMacroFromMission(macroKey));
-    
-    return row;
-}
-
-// 임무 검색
-function searchMissions() {
-    const searchText = document.getElementById('searchMissionName').value.toLowerCase();
-    
-    const tbody = document.getElementById('missionTableBody');
-    tbody.innerHTML = '';
-    
-    const missions = Object.entries(macroData.missions)
-        .filter(([missionName, macroKey]) => 
-            !searchText || missionName.toLowerCase().includes(searchText)
-        )
-        .sort((a, b) => a[0].localeCompare(b[0]));
-    
-    missions.forEach(([missionName, macroKey]) => {
-        const row = createMissionTableRow(missionName, macroKey);
-        tbody.appendChild(row);
-    });
+    try {
+        // 매크로 생성 탭으로 이동
+        const createTab = document.querySelector('#create-tab');
+        if (createTab) {
+            const tabTrigger = new bootstrap.Tab(createTab);
+            tabTrigger.show();
+        }
+        
+        // 잠시 후 폼에 작업량 입력
+        setTimeout(() => {
+            document.getElementById('inputProgress').value = progress;
+            document.getElementById('inputProgress').focus();
+        }, 100);
+        
+        showAlert(`작업량 ${progress}으로 매크로 생성을 시작합니다.`, 'info');
+        
+    } catch (error) {
+        console.error('매크로 생성 오류:', error);
+        showAlert('매크로 생성 중 오류가 발생했습니다.', 'danger');
+    }
 }
 
 // 매크로 보기
@@ -508,18 +440,9 @@ function viewMacro(macroKey) {
     }
 }
 
-// 임무에서 매크로 보기
-function viewMacroFromMission(macroKey) {
-    viewMacro(macroKey);
-}
-
 // 매크로 상세 정보 표시
 function showMacroDetails(parsed, macro, macroKey) {
     const infoDiv = document.getElementById('macroInfo');
-    
-    const linkedMissions = Object.entries(macroData.missions)
-        .filter(([missionName, key]) => key === macroKey)
-        .map(([missionName, key]) => missionName);
     
     infoDiv.innerHTML = `
         <div class="mb-3">
@@ -542,26 +465,6 @@ function showMacroDetails(parsed, macro, macroKey) {
             <h6 class="text-primary mb-2">메모</h6>
             <input type="text" class="form-control form-control-sm" value="${macro.memo || ''}" 
                    onchange="updateMacroMemo('${macroKey}', this.value)" placeholder="메모를 입력하세요...">
-        </div>
-        
-        <div class="mb-3">
-            <h6 class="text-primary mb-2">연결된 임무 <span class="badge bg-secondary">${linkedMissions.length}</span></h6>
-            <div class="mission-list" style="max-height: 150px; overflow-y: auto;">
-                ${linkedMissions.length > 0 ? 
-                    linkedMissions.map(mission => `
-                        <div class="mission-item d-flex justify-content-between align-items-center">
-                            <span>${mission}</span>
-                            <button class="btn btn-sm btn-outline-danger" onclick="confirmUnlinkMission('${mission}')" title="연결 해제">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    `).join('') :
-                    '<div class="text-muted text-center p-2">연결된 임무가 없습니다.</div>'
-                }
-            </div>
-            <button class="btn btn-sm btn-outline-primary mt-2" onclick="showLinkMissionModal('${macroKey}')">
-                <i class="bi bi-plus"></i> 임무 연결
-            </button>
         </div>
         
         <div class="mb-3">
@@ -827,7 +730,6 @@ function saveMacro() {
                 clearForm();
                 showMacroInfo('매크로를 선택하세요');
                 refreshMacroTable();
-                refreshMissionTable();
                 showAlert('매크로가 삭제되었습니다.', 'success');
             }
             return;
@@ -854,12 +756,11 @@ function deleteMacro() {
         const macroKey = createMacroKey(progress, maxQuality, initialQuality, durability);
         
         if (getMacro(macroKey)) {
-            if (confirm('현재 매크로를 삭제하시겠습니까?\n연결된 임무도 함께 해제됩니다.')) {
+            if (confirm('현재 매크로를 삭제하시겠습니까?')) {
                 deleteMacroData(macroKey);
                 clearForm();
                 showMacroInfo('매크로를 선택하세요');
                 refreshMacroTable();
-                refreshMissionTable();
                 showAlert('매크로가 삭제되었습니다.', 'success');
             }
         } else {
@@ -872,10 +773,9 @@ function deleteMacro() {
 
 // 매크로 삭제 확인
 function confirmDeleteMacro(macroKey) {
-    if (confirm('선택한 매크로를 삭제하시겠습니까?\n연결된 임무도 함께 해제됩니다.')) {
+    if (confirm('선택한 매크로를 삭제하시겠습니까?')) {
         deleteMacroData(macroKey);
         refreshMacroTable();
-        refreshMissionTable();
         if (currentMacroKey === macroKey) {
             showMacroInfo('매크로를 선택하세요');
         }
@@ -895,56 +795,7 @@ function clearForm() {
     showMacroInfo('매크로를 선택하세요');
 }
 
-// 임무 연결 모달 표시
-function showLinkMissionModal(macroKey) {
-    currentMacroKey = macroKey;
-    document.getElementById('missionNameInput').value = '';
-    const modal = new bootstrap.Modal(document.getElementById('linkMissionModal'));
-    modal.show();
-}
 
-// 임무 연결 확인
-function confirmLinkMission() {
-    const missionName = document.getElementById('missionNameInput').value.trim();
-    
-    if (!missionName) {
-        showAlert('임무 이름을 입력하세요.', 'warning');
-        return;
-    }
-    
-    if (!currentMacroKey) {
-        showAlert('매크로를 선택하세요.', 'warning');
-        return;
-    }
-    
-    macroData.missions[missionName] = currentMacroKey;
-    
-    // 자동 캐시 저장
-    saveToCacheQuiet();
-    
-    const modal = bootstrap.Modal.getInstance(document.getElementById('linkMissionModal'));
-    modal.hide();
-    
-    viewMacro(currentMacroKey);
-    refreshMissionTable();
-    showAlert('임무가 연결되었습니다.', 'success');
-}
-
-// 임무 연결 해제 확인
-function confirmUnlinkMission(missionName) {
-    if (confirm(`'${missionName}' 임무 연결을 해제하시겠습니까?`)) {
-        delete macroData.missions[missionName];
-        
-        // 자동 캐시 저장
-        saveToCacheQuiet();
-        
-        if (currentMacroKey) {
-            viewMacro(currentMacroKey);
-        }
-        refreshMissionTable();
-        showAlert('임무 연결이 해제되었습니다.', 'success');
-    }
-}
 
 // 데이터 내보내기
 function exportData() {
@@ -978,7 +829,6 @@ function importData(event) {
                 // 새 데이터를 캐시에 저장
                 saveToCacheQuiet();
                 refreshMacroTable();
-                refreshMissionTable();
                 showMacroInfo('매크로를 선택하세요');
                 showAlert('데이터가 성공적으로 로드되었습니다.', 'success');
             }
@@ -1010,7 +860,6 @@ function loadJsonData() {
             // 새 데이터를 캐시에 저장
             saveToCacheQuiet();
             refreshMacroTable();
-            refreshMissionTable();
             showMacroInfo('매크로를 선택하세요');
             
             const modal = bootstrap.Modal.getInstance(document.getElementById('jsonInputModal'));

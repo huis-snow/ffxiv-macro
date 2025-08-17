@@ -51,11 +51,6 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="mission-tab" data-bs-toggle="tab" data-bs-target="#mission" type="button" role="tab">
-                            <i class="bi bi-list-task"></i> 임무 조회
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab">
                             <i class="bi bi-plus-circle"></i> 매크로 생성
                         </button>
@@ -68,17 +63,24 @@
                     <div class="tab-pane fade show active" id="search" role="tabpanel">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">검색 및 정렬</h5>
+                                <h5 class="card-title mb-0">매크로 검색</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-3">
                                         <label class="form-label">작업량</label>
-                                        <input type="number" class="form-control" id="searchProgress" placeholder="작업량">
+                                        <input type="number" class="form-control" id="searchProgress" placeholder="작업량을 입력하세요">
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">최대품질</label>
-                                        <input type="number" class="form-control" id="searchMaxQuality" placeholder="최대품질">
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button class="btn btn-primary me-2" onclick="searchMacros()">
+                                            <i class="bi bi-search"></i> 검색
+                                        </button>
+                                        <button class="btn btn-outline-secondary me-2" onclick="refreshMacroTable()">
+                                            <i class="bi bi-arrow-clockwise"></i> 전체
+                                        </button>
+                                        <button class="btn btn-success" onclick="createMacroWithProgress()" id="createWithProgressBtn" style="display: none;">
+                                            <i class="bi bi-plus"></i> 매크로 생성
+                                        </button>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">정렬</label>
@@ -88,14 +90,6 @@
                                             <option value="initial_quality">초기품질</option>
                                             <option value="durability">내구도</option>
                                         </select>
-                                    </div>
-                                    <div class="col-md-3 d-flex align-items-end">
-                                        <button class="btn btn-primary me-2" onclick="searchMacros()">
-                                            <i class="bi bi-search"></i> 검색
-                                        </button>
-                                        <button class="btn btn-outline-secondary" onclick="refreshMacroTable()">
-                                            <i class="bi bi-arrow-clockwise"></i> 전체
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -117,7 +111,6 @@
                                                 <th>내구도</th>
                                                 <th>음식</th>
                                                 <th>메모</th>
-                                                <th>연결 임무 수</th>
                                                 <th>작업</th>
                                             </tr>
                                         </thead>
@@ -130,54 +123,7 @@
                         </div>
                     </div>
 
-                    <!-- 임무 조회 탭 -->
-                    <div class="tab-pane fade" id="mission" role="tabpanel">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">임무 검색</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">임무 이름</label>
-                                        <input type="text" class="form-control" id="searchMissionName" placeholder="임무 이름 검색" oninput="searchMissions()">
-                                    </div>
-                                    <div class="col-md-6 d-flex align-items-end">
-                                        <button class="btn btn-outline-secondary" onclick="refreshMissionTable()">
-                                            <i class="bi bi-arrow-clockwise"></i> 전체 보기
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- 임무 테이블 -->
-                        <div class="card mt-3">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">임무 목록</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-sm">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>임무 이름</th>
-                                                <th>작업량</th>
-                                                <th>최대품질</th>
-                                                <th>초기품질</th>
-                                                <th>내구도</th>
-                                                <th>메모</th>
-                                                <th>작업</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="missionTableBody">
-                                            <!-- 동적으로 생성 -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- 매크로 생성 탭 -->
                     <div class="tab-pane fade" id="create" role="tabpanel">
@@ -285,27 +231,7 @@
             </div>
         </div>
 
-        <!-- 임무 연결 모달 -->
-        <div class="modal fade" id="linkMissionModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">임무 연결</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">임무 이름:</label>
-                            <input type="text" class="form-control" id="missionNameInput" placeholder="임무 이름을 입력하세요">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button type="button" class="btn btn-primary" onclick="confirmLinkMission()">연결</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <!-- 플로팅 버튼 - JSON 직접 입력 -->
