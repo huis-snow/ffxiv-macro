@@ -23,8 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 이벤트 리스너 등록
     registerEventListeners();
     
-    // 모든 매크로 표시 (초기 로딩 시)
-    loadAllMacros();
+    // DOM이 완전히 준비된 후 테이블 렌더링
+    setTimeout(() => {
+        console.log('초기 테이블 렌더링 시작');
+        loadAllMacros();
+    }, 100);
     
     // 페이지 언로드 시 자동 저장
     window.addEventListener('beforeunload', function() {
@@ -349,6 +352,14 @@ function refreshMacroTable() {
 // 매크로 테이블 렌더링 (검색 필드 건드리지 않음)
 function loadAllMacros() {
     console.log('loadAllMacros 호출됨, 매크로 개수:', Object.keys(macroData.macros).length);
+    
+    // 테이블 요소가 존재하는지 확인
+    const tbody = document.getElementById('macroTableBody');
+    if (!tbody) {
+        console.error('macroTableBody 요소를 찾을 수 없습니다.');
+        return;
+    }
+    
     updateSortIcons();
     renderSortedTable();
 }
@@ -500,9 +511,29 @@ function updateSortIcons() {
 // 정렬된 테이블 렌더링
 function renderSortedTable() {
     const tbody = document.getElementById('macroTableBody');
+    if (!tbody) {
+        console.error('macroTableBody 요소를 찾을 수 없습니다.');
+        return;
+    }
+    
     tbody.innerHTML = '';
     
     const macros = getAllMacros();
+    console.log('renderSortedTable: 매크로 개수 =', macros.length);
+    
+    // 데이터가 없을 때 안내 메시지
+    if (macros.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-muted p-4">
+                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                    <div>저장된 매크로가 없습니다.</div>
+                    <small>상단의 "데이터 가져오기" 버튼을 사용하거나 "매크로 생성" 탭에서 새로 만드세요.</small>
+                </td>
+            </tr>
+        `;
+        return;
+    }
     
     // 정렬
     macros.sort((a, b) => {
@@ -525,10 +556,15 @@ function renderSortedTable() {
         }
     });
     
-    macros.forEach(macro => {
+    macros.forEach((macro, index) => {
         const row = createMacroTableRow(macro);
         tbody.appendChild(row);
+        if (index < 3) { // 처음 3개만 로그
+            console.log(`행 추가: ${macro.key}`);
+        }
     });
+    
+    console.log('테이블 렌더링 완료. 총 행 수:', tbody.children.length);
 }
 
 // 매크로 선택 (하이라이트 + 첫 블록 복사)
