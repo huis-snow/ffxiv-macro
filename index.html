@@ -96,18 +96,18 @@
                             </div>
                             <div class="card-body">
                                 <div class="row g-3 mb-3">
-                                    <div class="col-md-3">
+                                    <div class="col-md-4 col-lg-3">
                                         <label class="form-label">작업량</label>
                                         <input type="number" class="form-control" id="searchProgress" placeholder="작업량을 입력하세요">
                                     </div>
-                                    <div class="col-md-3 d-flex align-items-end">
-                                        <button class="btn btn-primary me-2" onclick="searchMacros()">
+                                    <div class="col-md-8 col-lg-9 d-flex align-items-end flex-wrap gap-2">
+                                        <button class="btn btn-primary flex-shrink-0" onclick="searchMacros()">
                                             <i class="bi bi-search"></i> 검색
                                         </button>
-                                        <button class="btn btn-outline-secondary me-2" onclick="refreshMacroTable()">
+                                        <button class="btn btn-outline-secondary flex-shrink-0" onclick="refreshMacroTable()">
                                             <i class="bi bi-arrow-clockwise"></i> 전체
                                         </button>
-                                        <button class="btn btn-success" onclick="createMacroWithProgress()" id="createWithProgressBtn" style="display: none;">
+                                        <button class="btn btn-success flex-shrink-0" onclick="createMacroWithProgress()" id="createWithProgressBtn" style="display: none;">
                                             <i class="bi bi-plus"></i> 매크로 추가
                                         </button>
                                     </div>
